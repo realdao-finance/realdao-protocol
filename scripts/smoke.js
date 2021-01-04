@@ -41,6 +41,9 @@ class SmokeTest extends RealDAO {
     await distributor.createLendingPool(rDOLAddr, currentBlock.number + 3).send(from(admin))
     await advanceBlocks(2)
 
+    await distributor.openPool(0).send(from(admin))
+    await distributor.openPool(1).send(from(admin))
+
     // setup mock data
     await oracle.setUnderlyingPrice('ETH', ETH_PRICE.toString()).send(from(admin))
 
