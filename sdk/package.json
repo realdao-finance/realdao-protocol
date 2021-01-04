@@ -1,0 +1,19 @@
+{
+  "name": "realdao",
+  "version": "0.1.1",
+  "description": "RealDAO SDK",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "browserify index.js -o dist/realdao.min.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "browserify": "^17.0.0",
+    "js2dts": "^0.3.3"
+  }
+}
