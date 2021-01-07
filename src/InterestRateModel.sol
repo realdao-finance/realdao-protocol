@@ -48,7 +48,7 @@ contract InterestRateModel is AuthBase {
    */
   function initialize(address _orchestrator) public override {
     super.initialize(_orchestrator);
-    uint256 baseRatePerYear = 0;
+    uint256 baseRatePerYear = 0.01e18;
     uint256 multiplierPerYear = 0.05e18;
     uint256 jumpMultiplierPerYear = 1.09e18;
     uint256 _kink = 0.8e18;
