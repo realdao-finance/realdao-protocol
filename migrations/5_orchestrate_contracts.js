@@ -13,8 +13,9 @@ const Orchestrator = artifacts.require('Orchestrator')
 function unuse() {}
 
 async function main(deployer, network, accounts) {
+  if (network === 'unittest') return
+
   unuse(deployer)
-  unuse(network)
   const admin = accounts[0]
 
   // const supremeInstance = await Supreme.deployed()

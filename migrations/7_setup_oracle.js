@@ -3,6 +3,8 @@ const FeedPriceOracle = artifacts.require('FeedPriceOracle')
 function unuse() {}
 
 async function main(deployer, network, accounts) {
+  if (network === 'unittest') return
+
   unuse(deployer)
 
   if (network !== 'mainnet') {

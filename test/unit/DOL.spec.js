@@ -1,5 +1,6 @@
 const { expectRevert } = require('../util/expect')
 const DOL = artifacts.require('DOL')
+const MockOrchestrator = artifacts.require('MockOrchestrator')
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 
@@ -7,18 +8,23 @@ let dol
 let admin
 let superior
 let accounts
+let orchestrator
 
 async function deployContracts() {
   accounts = await web3.eth.getAccounts()
   admin = accounts[0]
-  superior = admin
+  superior = accounts[1]
   dol = await DOL.deployed()
+  orchestrator = await MockOrchestrator.deployed()
 }
 
 async function initializeContracts() {
   await deployContracts()
-  await dol.initialize(admin)
-  await dol.mint(admin, 10000e8, { from: admin })
+
+  await orchestrator.setCouncil(admin)
+  await dol.initialize(orchestrator.address)
+  await dol.setSuperior(superior)
+  await dol.mint(admin, 10000e8, { from: superior })
 }
 
 contract('DOL:deploy', () => {
@@ -40,11 +46,10 @@ contract('DOL:deploy', () => {
 })
 
 contract('DOL:mint', () => {
-  before('setup DOL contract', deployContracts)
+  before('setup DOL contract', initializeContracts)
 
   it('should be ok minting by the superior', async () => {
     const user = accounts[2]
-    await dol.initialize(superior)
     await expectRevert(dol.initialize(user))
 
     const mintAmount = 100e8

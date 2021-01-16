@@ -1,7 +1,7 @@
 const { advanceBlocks } = require('../util/advance')
 const { expectRevert } = require('../util/expect')
 const RDS = artifacts.require('RDS')
-const MockErc20 = artifacts.require('MockErc20')
+const MockERC20 = artifacts.require('MockERC20')
 const MockController = artifacts.require('MockController')
 const MockOrchestrator = artifacts.require('MockOrchestrator')
 const Distributor = artifacts.require('Distributor')
@@ -40,7 +40,8 @@ async function initializeContracts() {
   await orchestrator.setRDS(rds.address)
   await orchestrator.setCouncil(admin)
 
-  await rds.initialize(distributor.address)
+  await rds.initialize(orchestrator.address)
+  await rds.setSuperior(distributor.address)
   await distributor.initialize(orchestrator.address)
   await controller.initialize(orchestrator.address)
 }
@@ -63,32 +64,31 @@ contract('Distributor:initialize', () => {
   it('should fail to create lending pool by normal user which are not admin', async () => {
     const someUser = accounts[1]
     const someToken = accounts[2]
-    await expectRevert(distributor.createLendingPool(someToken, 10000, { from: someUser }))
+    await expectRevert(distributor.createLendingPool(someToken, 100, 1, { from: someUser }))
   })
 })
 
 contract('Distributor:createLendingPool', () => {
   let someToken
-  let currentBlock
 
   before('initialize Distributor', async () => {
     await initializeContracts()
     someToken = accounts[1]
-    currentBlock = await web3.eth.getBlock('latest')
   })
 
   it('should fail to createLendingPool for unlisted market', async () => {
-    await expectRevert(distributor.createLendingPool(someToken, 10000, { from: admin }))
+    await expectRevert(distributor.createLendingPool(someToken, 100, 1, { from: admin }))
   })
 
   it('should fail to createLendingPool with invalid startBlock', async () => {
     await controller.addMarket(someToken)
-    await expectRevert(distributor.createLendingPool(someToken, currentBlock.number, { from: admin }))
+    await expectRevert(distributor.createLendingPool(someToken, 100, 0, { from: admin }))
   })
 
   it('should success to createLendingPool', async () => {
-    const startBlockNumber = currentBlock.number + 5
-    await distributor.createLendingPool(someToken, startBlockNumber, { from: admin })
+    const currentBlock = await web3.eth.getBlock('latest')
+    const startBlockNumber = currentBlock.number + 6
+    await distributor.createLendingPool(someToken, 100, 5, { from: admin })
     assert.equal(await distributor.activePools(), 0)
     const pool = await distributor.getPool(0)
     assert.equal(pool.id, 0)
@@ -103,27 +103,26 @@ contract('Distributor:createLendingPool', () => {
   })
 
   it('should fail to createLendingPool for the same market', async () => {
-    await expectRevert(distributor.createLendingPool(someToken, currentBlock.number + 5, { from: admin }))
+    await expectRevert(distributor.createLendingPool(someToken, 100, 5, { from: admin }))
   })
 })
 
 contract('Distributor:createExchangingPool', () => {
-  let currentBlock
   let someToken
 
   before('initialize Distributor', async () => {
     await initializeContracts()
-    currentBlock = await web3.eth.getBlock('latest')
     someToken = accounts[1]
   })
 
   it('should fail to createExchangingPool with invalid startBlock', async () => {
-    await expectRevert(distributor.createExchangingPool(someToken, currentBlock.number), { from: admin })
+    await expectRevert(distributor.createExchangingPool(someToken, 100, 0), { from: admin })
   })
 
   it('should success to createExchangingPool', async () => {
-    const startBlockNumber = currentBlock.number + 5
-    await distributor.createExchangingPool(someToken, startBlockNumber, { from: admin })
+    const currentBlock = await web3.eth.getBlock('latest')
+    const startBlockNumber = currentBlock.number + 6
+    await distributor.createExchangingPool(someToken, 100, 5, { from: admin })
     assert.equal(await distributor.activePools(), 0)
     const pool = await distributor.getPool(0)
     assert.equal(pool.id, 0)
@@ -134,13 +133,11 @@ contract('Distributor:createExchangingPool', () => {
   })
 
   it('should fail to createExchangingPool for the same token', async () => {
-    await expectRevert(distributor.createExchangingPool(someToken, currentBlock.number + 5, { from: admin }))
+    await expectRevert(distributor.createExchangingPool(someToken, 100, 5, { from: admin }))
   })
 })
 
 contract('Distributor:openPool', () => {
-  let currentBlock
-  let startBlockNumber
   let market
   let id
   let someUser
@@ -149,11 +146,9 @@ contract('Distributor:openPool', () => {
     await initializeContracts()
     market = accounts[1]
     someUser = accounts[2]
-    currentBlock = await web3.eth.getBlock('latest')
-    startBlockNumber = currentBlock.number + 5
 
     await controller.addMarket(market)
-    await distributor.createLendingPool(market, startBlockNumber, { from: admin })
+    await distributor.createLendingPool(market, 100, 5, { from: admin })
     id = 0
   })
 
@@ -166,7 +161,7 @@ contract('Distributor:openPool', () => {
   })
 
   it('should success to openPool', async () => {
-    currentBlock = await advanceBlocks(5)
+    const currentBlock = await advanceBlocks(5)
     await distributor.openPool(id, { from: someUser })
     assert.equal(await distributor.rewardsPerBlock(), REWARDS_PER_BLOCK)
     assert.equal(await distributor.activePools(), 1)
@@ -178,7 +173,6 @@ contract('Distributor:openPool', () => {
     assert.equal(pool.ptype, POOL_TYPE_LENDING)
     assert.equal(pool.tokenAddr, market)
     assert.equal(pool.state, POOL_STATE_ACTIVE)
-    assert.equal(pool.startBlock, startBlockNumber)
   })
 
   it('should fail to open an active pool', async () => {
@@ -196,9 +190,8 @@ contract('Distributor:closePool', () => {
     market = accounts[1]
     someUser = accounts[2]
 
-    const currentBlock = await web3.eth.getBlock('latest')
     await controller.addMarket(market)
-    await distributor.createLendingPool(market, currentBlock.number + 5, { from: admin })
+    await distributor.createLendingPool(market, 100, 5, { from: admin })
     id = 0
 
     await advanceBlocks(5)
@@ -234,7 +227,7 @@ contract('Distributor:updateLendingPower', () => {
 
     currentBlock = await web3.eth.getBlock('latest')
     await controller.addMarket(market)
-    await distributor.createLendingPool(market, currentBlock.number + 5, { from: admin })
+    await distributor.createLendingPool(market, 100, 5, { from: admin })
     id = 0
   })
 
@@ -320,12 +313,12 @@ contract('Distributor:mintExchangingPool', () => {
     await initializeContracts()
     user = accounts[1]
 
-    lpToken = await MockErc20.deployed()
+    lpToken = await MockERC20.deployed()
     await lpToken.transfer(user, balance, { from: admin })
     assert.equal(await lpToken.balanceOf(user), balance)
 
     currentBlock = await web3.eth.getBlock('latest')
-    await distributor.createExchangingPool(lpToken.address, currentBlock.number + 5, { from: admin })
+    await distributor.createExchangingPool(lpToken.address, 100, 5, { from: admin })
     id = 0
   })
 
@@ -375,7 +368,7 @@ contract('Distributor:claim', () => {
     market = accounts[1]
     user = accounts[2]
 
-    lpToken = await MockErc20.deployed()
+    lpToken = await MockERC20.deployed()
     await lpToken.transfer(user, balance, { from: admin })
     assert.equal(await lpToken.balanceOf(user), balance)
 
@@ -383,10 +376,10 @@ contract('Distributor:claim', () => {
 
     await controller.addMarket(market)
     currentBlock = await web3.eth.getBlock('latest')
-    await distributor.createLendingPool(market, currentBlock.number + 5, { from: admin })
+    await distributor.createLendingPool(market, 100, 5, { from: admin })
     id1 = 0
 
-    await distributor.createExchangingPool(lpToken.address, currentBlock.number + 5, { from: admin })
+    await distributor.createExchangingPool(lpToken.address, 100, 5, { from: admin })
     id2 = 1
   })
 
@@ -432,14 +425,14 @@ contract('Distributor:exitExchangingPool', () => {
     await initializeContracts()
     user = accounts[1]
 
-    lpToken = await MockErc20.deployed()
+    lpToken = await MockERC20.deployed()
     await lpToken.transfer(user, balance, { from: admin })
     assert.equal(await lpToken.balanceOf(user), balance)
 
     await lpToken.approve(distributor.address, balance, { from: user })
 
     currentBlock = await web3.eth.getBlock('latest')
-    await distributor.createExchangingPool(lpToken.address, currentBlock.number + 5, { from: admin })
+    await distributor.createExchangingPool(lpToken.address, 100, 5, { from: admin })
     id = 0
   })
 

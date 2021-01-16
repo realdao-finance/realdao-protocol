@@ -78,11 +78,15 @@ async function initializeContracts() {
 
   await interestRate.initialize(orchestrator.address)
   await oracle.initialize(orchestrator.address)
-  await rds.initialize(distributor.address)
+  await rds.initialize(orchestrator.address)
+  await dol.initialize(orchestrator.address)
   await distributor.initialize(orchestrator.address)
   await controller.initialize(orchestrator.address)
   await controller.bind(controllerLib)
   await reporter.initialize(orchestrator.address)
+
+  await rds.setSuperior(distributor.address)
+  await dol.setSuperior(rDOL.address)
 
   await rETH.initialize(orchestrator.address, rTokenParts)
   await rDOL.initialize(orchestrator.address, dol.address, rTokenParts)
@@ -95,12 +99,13 @@ async function setupContracts() {
   await controller.supportMarket(rETH.address)
   await controller.supportMarket(rDOL.address)
 
-  const currentBlock = await web3.eth.getBlock('latest')
-  await distributor.createLendingPool(rETH.address, currentBlock.number + 2, { from: admin })
-  await distributor.createLendingPool(rDOL.address, currentBlock.number + 3, { from: admin })
-  await advanceBlocks(2)
+  await distributor.createLendingPool(rETH.address, 100, 2, { from: admin })
+  await distributor.createLendingPool(rDOL.address, 100, 2, { from: admin })
+  await advanceBlocks(3)
   await distributor.openPool(0, { from: admin })
   await distributor.openPool(1, { from: admin })
+
+  await interestRate.updateModel(0, 0, (1.09e18).toString(), (0.8e18).toString())
 }
 
 contract('RToken:mint', () => {
@@ -124,8 +129,7 @@ contract('RToken:mint', () => {
 
   it('should success to mint ether', async () => {
     await controller.supportMarket(rETH.address, { from: admin })
-    const currentBlock = await web3.eth.getBlock('latest')
-    await distributor.createLendingPool(rETH.address, currentBlock.number + 2, { from: admin })
+    await distributor.createLendingPool(rETH.address, 100, 2, { from: admin })
     await advanceBlocks(3)
     await distributor.openPool(0, { from: admin })
     await rETH.mint({ value: mintAmount, from: user })
@@ -149,10 +153,9 @@ contract('RToken:borrow', () => {
     await controller.supportMarket(rETH.address)
     await controller.supportMarket(rDOL.address)
 
-    const currentBlock = await web3.eth.getBlock('latest')
-    await distributor.createLendingPool(rETH.address, currentBlock.number + 2, { from: admin })
-    await distributor.createLendingPool(rDOL.address, currentBlock.number + 3, { from: admin })
-    await advanceBlocks(2)
+    await distributor.createLendingPool(rETH.address, 100, 2, { from: admin })
+    await distributor.createLendingPool(rDOL.address, 100, 2, { from: admin })
+    await advanceBlocks(3)
   })
 
   it('should fail to borrow without supply', async () => {
@@ -267,7 +270,7 @@ contract('RToken:liquidateBorrow', () => {
     let liquidity = await controller.getAccountLiquidity(user1)
     assert.equal(liquidity[1].toNumber(), 0)
 
-    await oracle.setUnderlyingPrice('ETH', ETH_PRICE2.toString())
+    await oracle.setUnderlyingPrices(['ETH'], [ETH_PRICE2.toString()])
     liquidity = await controller.getAccountLiquidity(user1)
     assert.equal(liquidity[1].toNumber(), 1250000000)
 

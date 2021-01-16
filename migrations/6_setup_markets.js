@@ -48,6 +48,12 @@ async function main(deployer, network, accounts) {
   isLive = network === 'mainnet' || network === 'testnet'
   await deployContracts(deployer)
 
+  if (network === 'unittest' || network === 'dev') {
+    await deployer.deploy(REther)
+  }
+
+  if (network === 'unittest') return
+
   admin = accounts[0]
   rtokenParts = [RTokenPart1.address, RTokenPart2.address, RTokenPart3.address]
 
@@ -74,7 +80,6 @@ async function main(deployer, network, accounts) {
   ])
 
   if (network === 'dev') {
-    await deployer.deploy(REther)
     const retherInstance = await REther.deployed()
     await retherInstance.initialize(orchestratorAddress, rtokenParts)
     await controllerInstance.supportMarket(REther.address)

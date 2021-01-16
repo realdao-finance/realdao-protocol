@@ -159,6 +159,7 @@ contract Orchestrator is ErrorBase {
       );
     }
     contracts[key] = ContractConfig({ addr: addr, variability: variability, permission: permission });
+    emit ContractChanged(key, address(0), addr);
   }
 
   function updateContract(string memory key, address newAddr) public {

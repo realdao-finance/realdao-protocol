@@ -1,23 +1,32 @@
 const { expectRevert } = require('../util/expect')
 const RDS = artifacts.require('RDS')
+const MockOrchestrator = artifacts.require('MockOrchestrator')
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
+
+const MAX_SUPPLY = (100000000e8).toString()
+const INITIAL_ISSUE = (20000000e8).toString()
 
 let rds
 let admin
 let superior
 let accounts
+let orchestrator
 
 async function deployContracts() {
   accounts = await web3.eth.getAccounts()
   admin = accounts[0]
   superior = accounts[1]
   rds = await RDS.deployed()
+  orchestrator = await MockOrchestrator.deployed()
 }
 
 async function initializeContracts() {
   await deployContracts()
-  await rds.initialize(superior)
+
+  await orchestrator.setCouncil(admin)
+  await rds.initialize(orchestrator.address)
+  await rds.setSuperior(superior)
 }
 
 contract('RDS:deploy', () => {
@@ -28,13 +37,13 @@ contract('RDS:deploy', () => {
     assert.equal(decimals, 8)
 
     const maxSupply = await rds.maxSupply()
-    assert.equal(maxSupply, 21000000e8)
+    assert.equal(maxSupply.toString(), MAX_SUPPLY)
 
     const totalSupply = await rds.totalSupply()
-    assert.equal(totalSupply, 4200000e8)
+    assert.equal(totalSupply.toString(), INITIAL_ISSUE)
 
     const adminBalance = await rds.balanceOf(admin)
-    assert.equal(adminBalance, 4200000e8)
+    assert.equal(adminBalance.toString(), INITIAL_ISSUE)
   })
 })
 
@@ -47,8 +56,11 @@ contract('RDS:mint', () => {
 
   it('should be ok minting by the superior', async () => {
     const user = accounts[2]
-    await rds.initialize(superior)
+    await orchestrator.setCouncil(admin)
+    await rds.initialize(orchestrator.address)
     await expectRevert(rds.initialize(user))
+
+    await rds.setSuperior(superior)
 
     const mintAmount = 100e8
     await rds.mint(user, mintAmount, { from: superior })
@@ -56,7 +68,7 @@ contract('RDS:mint', () => {
   })
 
   it('should fail to mint if exceeding the max supply', async () => {
-    await expectRevert(rds.mint(accounts[2], 21000000e8, { from: superior }))
+    await expectRevert(rds.mint(accounts[2], MAX_SUPPLY, { from: superior }))
   })
 
   it('should fail to mint to zero address', async () => {

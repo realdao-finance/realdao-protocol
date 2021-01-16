@@ -65,44 +65,72 @@ async function initializeContracts() {
   await MockMarketControllerV2.deployed()
 
   await orchestrator.initialize(
-    [MarketControllerLibrary.address],
     [
+      MarketControllerLibrary.address,
       controllerImpl.address,
       distributorImpl.address,
-      councilImpl.address,
       interestRateImpl.address,
       oracleImpl.address,
-      dol.address,
       rds.address,
+      dol.address,
+      councilImpl.address,
       reporter.address,
     ],
-    [RTokenPart1.address, RTokenPart2.address, RTokenPart3.address],
-    rETH.address,
-    rDOL.address,
     {
       from: admin,
     }
   )
+  const proxyCreatedEvents = await orchestrator.getPastEvents('ProxyCreated')
+  const contractChangedEvents = await orchestrator.getPastEvents('ContractChanged')
+  const proxyUpgradedEvents = await orchestrator.getPastEvents('ProxyUpgraded')
 
-  oracle = new MockPriceOracle(await orchestrator.getOracle())
-  interestRate = new InterestRateModel(await orchestrator.getInterestRateModel())
-  controller = new MarketController(await orchestrator.getMarketController())
-  distributor = new Distributor(await orchestrator.getDistributor())
-  council = new Council(await orchestrator.getCouncil())
+  oracle = new MockPriceOracle(await orchestrator.getAddress('ORACLE'))
+  interestRate = new InterestRateModel(await orchestrator.getAddress('INTEREST_RATE_MODEL'))
+  controller = new MarketController(await orchestrator.getAddress('MARKET_CONTROLLER'))
+  distributor = new Distributor(await orchestrator.getAddress('DISTRIBUTOR'))
+  council = new Council(await orchestrator.getAddress('COUNCIL'))
+
+  assert.equal(proxyCreatedEvents.length, 2)
+  expect(proxyCreatedEvents[0].args).to.include({
+    key: 'MARKET_CONTROLLER',
+    proxy: controller.address,
+    impl: MarketController.address,
+  })
+
+  assert.equal(contractChangedEvents.length, 6)
+  expect(contractChangedEvents[0].args).to.include({
+    key: 'INTEREST_RATE_MODEL',
+    oldAddr: '0x0000000000000000000000000000000000000000',
+    newAddr: interestRate.address,
+  })
+  expect(contractChangedEvents[5].args).to.include({
+    key: 'REPORTER',
+    oldAddr: '0x0000000000000000000000000000000000000000',
+    newAddr: reporter.address,
+  })
+
+  assert.equal(proxyUpgradedEvents.length, 0)
 }
 
 async function setupContracts() {
   await initializeContracts()
 
-  // system setup after initialization
-  const currentBlock = await web3.eth.getBlock('latest')
+  const rTokenParts = [RTokenPart1.address, RTokenPart2.address, RTokenPart3.address]
 
-  await distributor.createLendingPool(rETH.address, currentBlock.number + 2, { from: admin })
-  await distributor.createLendingPool(rDOL.address, currentBlock.number + 3, { from: admin })
-  await advanceBlocks(2)
+  await rds.setSuperior(distributor.address)
+  await dol.setSuperior(rDOL.address)
+
+  await rETH.initialize(orchestrator.address, rTokenParts)
+  await rDOL.initialize(orchestrator.address, dol.address, rTokenParts)
+
+  await controller.supportMarket(rETH.address)
+  await controller.supportMarket(rDOL.address)
+  await distributor.createLendingPool(rETH.address, 100, 2, { from: admin })
+  await distributor.createLendingPool(rDOL.address, 100, 2, { from: admin })
+  await advanceBlocks(3)
 
   // setup mock data
-  await oracle.setUnderlyingPrice('ETH', ETH_PRICE.toString())
+  await oracle.setUnderlyingPrices(['ETH'], [ETH_PRICE.toString()])
 }
 
 contract('Orchestrator:smoke', () => {
@@ -128,6 +156,8 @@ contract('Orchestrator:smoke', () => {
   })
 
   it('transfer dol', async () => {
+    const balance = await dol.balanceOf(user1)
+    console.log('user1 balance:', balance)
     await dol.transfer(user3, 1000e8, { from: user1 })
   })
 
@@ -190,46 +220,20 @@ contract('Orchestrator:initialize', () => {
 
   it('check orchestrator states after initialization', async () => {
     assert.equal(await orchestrator.guardian(), admin)
-    assert.equal(await orchestrator.getRDS(), rds.address)
-    assert.equal(await orchestrator.getDOL(), dol.address)
-    assert.equal(await orchestrator.getOracle(), oracle.address)
-    assert.equal(await orchestrator.getInterestRateModel(), interestRate.address)
-    assert.equal(await orchestrator.getReporter(), reporter.address)
-    assert.equal(await orchestrator.getCouncil(), council.address)
-    assert.equal(await orchestrator.getDistributor(), distributor.address)
-    assert.equal(await orchestrator.getMarketController(), controller.address)
+    assert.equal(await orchestrator.getAddress('RDS'), rds.address)
+    assert.equal(await orchestrator.getAddress('DOL'), dol.address)
+    assert.equal(await orchestrator.getAddress('ORACLE'), oracle.address)
+    assert.equal(await orchestrator.getAddress('INTEREST_RATE_MODEL'), interestRate.address)
+    assert.equal(await orchestrator.getAddress('REPORTER'), reporter.address)
+    assert.equal(await orchestrator.getAddress('COUNCIL'), council.address)
+    assert.equal(await orchestrator.getAddress('DISTRIBUTOR'), distributor.address)
+    assert.equal(await orchestrator.getAddress('MARKET_CONTROLLER'), controller.address)
   })
 
   it('check proxy states', async () => {
     const controllerProxy = new UpgradableProxy(controller.address)
     assert.equal(await controllerProxy._implementation(), MarketController.address)
     assert.equal(await controllerProxy._admin(), orchestrator.address)
-  })
-
-  it('check proxy events', async () => {
-    const proxyCreatedEvents = await orchestrator.getPastEvents('ProxyCreated')
-    assert.equal(proxyCreatedEvents.length, 2)
-    expect(proxyCreatedEvents[0].args).to.include({
-      key: 'MARKET_CONTROLLER',
-      proxy: controller.address,
-      impl: MarketController.address,
-    })
-
-    const contractChangedEvents = await orchestrator.getPastEvents('ContractChanged')
-    assert.equal(contractChangedEvents.length, 6)
-    expect(contractChangedEvents[0].args).to.include({
-      key: 'COUNCIL',
-      oldAddr: '0x0000000000000000000000000000000000000000',
-      newAddr: council.address,
-    })
-    expect(contractChangedEvents[5].args).to.include({
-      key: 'REPORTER',
-      oldAddr: '0x0000000000000000000000000000000000000000',
-      newAddr: reporter.address,
-    })
-
-    const proxyUpgradedEvents = await orchestrator.getPastEvents('ProxyUpgraded')
-    assert.equal(proxyUpgradedEvents.length, 0)
   })
 })
 
@@ -244,8 +248,8 @@ contract('Orchestrator:upgrade', () => {
   })
 
   it('check proxy state after upgrade', async () => {
-    await orchestrator.upgradeMarketController(MockMarketControllerV2.address)
-    assert.equal(await orchestrator.getMarketController(), controller.address)
+    await orchestrator.upgradeProxy('MARKET_CONTROLLER', MockMarketControllerV2.address)
+    assert.equal(await orchestrator.getAddress('MARKET_CONTROLLER'), controller.address)
 
     const controllerProxy = new UpgradableProxy(controller.address)
     assert.equal(await controllerProxy._implementation(), MockMarketControllerV2.address)
@@ -274,8 +278,8 @@ contract('Orchestrator:upgrade', () => {
     expect(markets).to.deep.equal(allMarkets)
   })
 
-  it('should fail to upgrade distributor after set it final', async () => {
-    await orchestrator.setDistributorFinal()
-    await expectRevert(orchestrator.upgradeDistributor(MockMarketControllerV2.address))
+  it('should fail to upgrade unupgradeable contract', async () => {
+    await expectRevert(orchestrator.upgradeProxy('RDS', MockMarketControllerV2.address))
+    await expectRevert(orchestrator.upgradeProxy('ORACLE', MockMarketControllerV2.address))
   })
 })

@@ -7,6 +7,8 @@ const Distributor = artifacts.require('Distributor')
 const Orchestrator = artifacts.require('Orchestrator')
 
 async function main(deployer, network, accounts) {
+  if (network === 'unittest') return
+
   const admin = accounts[0]
 
   if (network !== 'mainnet') {
