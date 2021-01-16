@@ -11,13 +11,11 @@ class SmokeTest extends RealDAO {
   async run() {
     global.web3 = this._web3
     const accounts = await this._web3.eth.getAccounts()
-    const ETH_PRICE = 400e8
     const admin = (this.admin = accounts[0])
     const user1 = accounts[1]
     const user2 = accounts[2]
     const user3 = accounts[3]
 
-    await this.loadOrchestrator()
     await this.loadDistributor()
     await this.loadOracle()
     await this.loadController()
@@ -33,48 +31,52 @@ class SmokeTest extends RealDAO {
     const rETH = this.rETH()
     const rDOL = this.rDOL()
 
-    const rETHAddr = this.rETH(true).options.address
+    // const rETHAddr = this.rETH(true).options.address
     const rDOLAddr = this.rDOL(true).options.address
     // setup contracts
-    const currentBlock = await this._web3.eth.getBlock('latest')
-    await distributor.createLendingPool(rETHAddr, currentBlock.number + 2).send(from(admin))
-    await distributor.createLendingPool(rDOLAddr, currentBlock.number + 3).send(from(admin))
-    await advanceBlocks(2)
 
-    await distributor.openPool(0).send(from(admin))
-    await distributor.openPool(1).send(from(admin))
+    // await distributor.openPool(0).send(from(admin))
+    // await distributor.openPool(1).send(from(admin))
 
-    // setup mock data
-    await oracle.setUnderlyingPrice('ETH', ETH_PRICE.toString()).send(from(admin))
+    await oracle.setUnderlyingPrices(['ETH'], [400e8]).send({ from: admin })
 
     // supply ether
+    console.log('===========supplying ETH==============')
     await rETH.mint().send(from(user1, 10e18))
     await rETH.mint().send(from(user2, 2e18))
 
     // borrow dol
+    console.log('===========borrowing DOL==============')
     await rDOL.borrow(2000e8).send(from(user1))
     await rDOL.borrow(400e8).send(from(user2))
 
     // transfer dol
+    console.log('===========transfering DOL==============')
     await dol.transfer(user3, 1000e8).send(from(user1))
 
     // supply dol
+    console.log('===========supplying DOL==============')
     await dol.approve(rDOLAddr, 500e8).send(from(user3))
     await rDOL.mint(500e8).send(from(user3))
 
     // borrow ether
+    console.log('===========borrowing DOL==============')
     await rETH.borrow(String(0.5e18)).send(from(user3))
 
     // transfer ether
+    console.log('===========transfering rETH==============')
     await rETH.transfer(user3, 1e8).send(from(user1))
 
     // transfer rDOL'
+    console.log('===========transfering DOL==============')
     await dol.transfer(user3, 100e8).send(from(user2))
 
     // redeem ether'
+    console.log('===========redeeming ETH==============')
     await rETH.redeem(0.5e8).send(from(user3))
 
     // redeem dol
+    console.log('===========redeeming DOL==============')
     await rDOL.redeem(50e8).send(from(user3))
 
     // markets
@@ -127,9 +129,9 @@ class SmokeTest extends RealDAO {
 async function main(argv) {
   const options = {
     Web3,
-    network: RealDAO.Networks[env.current],
+    env: env.current,
     provider: env.networks[env.current].provider,
-    supremeAddress: env.networks[env.current].supremeAddress,
+    orchestrator: env.networks[env.current].orchestrator,
   }
   const smoke = new SmokeTest(options)
   await smoke.run()

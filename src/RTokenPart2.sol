@@ -83,7 +83,7 @@ contract RTokenPart2 is RTokenBase {
       "RToken/accrual block number check for collateral token failed"
     );
 
-    MarketControllerInterface controller = MarketControllerInterface(orchestrator.getMarketController());
+    MarketControllerInterface controller = MarketControllerInterface(orchestrator.getAddress("MARKET_CONTROLLER"));
     uint256 allowed = controller.liquidateBorrowAllowed(
       address(this),
       rTokenCollateral,
@@ -145,7 +145,7 @@ contract RTokenPart2 is RTokenBase {
   ) internal returns (uint256) {
     expect(accrualBlockNumber == getBlockNumber(), ERR_FRESHNESS_CHECK, "RToken/accrual block number check failed");
 
-    MarketControllerInterface controller = MarketControllerInterface(orchestrator.getMarketController());
+    MarketControllerInterface controller = MarketControllerInterface(orchestrator.getAddress("MARKET_CONTROLLER"));
     uint256 allowed = controller.repayBorrowAllowed(address(this), payer, borrower, repayAmount);
     checkBusiness(allowed == 0, ERR_CONTROLLER_REJECTION, "RToken/want repay but controller rejected");
 

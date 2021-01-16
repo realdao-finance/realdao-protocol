@@ -10,11 +10,11 @@ import "./MarketControllerErrorCode.sol";
 /**
  * @title RealDAO' MarketController Contract
  */
-contract MarketControllerPart1 is Exponential, ErrorBase, MarketControllerErrorCode {
+contract MarketControllerLibrary is Exponential, ErrorBase, MarketControllerErrorCode {
   MarketControllerInterface public controller;
 
   function bind(address _controller) external {
-    expect(address(controller) == address(0), ERR_ALREADY_BOUND, "MarketController/controller parts already bound");
+    expect(address(controller) == address(0), ERR_ALREADY_BOUND, "MarketController/controller library already bound");
     controller = MarketControllerInterface(_controller);
   }
 

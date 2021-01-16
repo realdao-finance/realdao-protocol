@@ -1,0 +1,12 @@
+{
+  "mainnet": {
+    "WHT": "",
+    "HBTC": "",
+    "HETH": ""
+  },
+  "testnet": {
+    "WHT": "",
+    "HBTC": "",
+    "HETH": ""
+  }
+}

@@ -24,7 +24,7 @@ contract RTokenPart3 is RTokenBase {
   ) external {
     checkParams(src != dst, ERR_TRANSFER_SRC_EQUALS_DST, "RToken/transfer src should not be equal to dst");
     /* Fail if transfer not allowed */
-    MarketControllerInterface controller = MarketControllerInterface(orchestrator.getMarketController());
+    MarketControllerInterface controller = MarketControllerInterface(orchestrator.getAddress("MARKET_CONTROLLER"));
     uint256 allowed = controller.transferAllowed(address(this), src, dst, tokens);
     checkBusiness(allowed == 0, ERR_CONTROLLER_REJECTION, "RToken/want transfer but controller rejected");
 

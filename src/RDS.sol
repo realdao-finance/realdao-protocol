@@ -2,12 +2,13 @@ pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import "./libraries/SafeMath.sol";
+import "./AuthBase.sol";
 
 /**
  * @title RDS contract (EIP-20 compatible)
  * @notice Governance and incentive token in realdao protocol
  */
-contract RDS {
+contract RDS is AuthBase {
   using SafeMath for uint256;
 
   /// @notice EIP-20 token name for this token
@@ -23,7 +24,7 @@ contract RDS {
   uint256 public totalSupply;
 
   /// @notice Max supply of tokens
-  uint256 public constant maxSupply = 21000000e8; // 21 million
+  uint256 public constant maxSupply = 100000000e8;
 
   /// @notice Allowance amounts on behalf of others
   mapping(address => mapping(address => uint256)) internal allowances;
@@ -83,14 +84,24 @@ contract RDS {
 
   constructor() public {
     admin = msg.sender;
-    uint256 initialSupply = 4200000e8; // 4.2 million
+    uint256 initialSupply = 20000000e8;
     balances[admin] = initialSupply;
     totalSupply = initialSupply;
   }
 
-  function initialize(address _superior) external {
-    require(admin == msg.sender, "RDS/permission denied");
-    require(superior == address(0), "RDS/already initialized");
+  /**
+   * @notice Initialize the DOL contract
+   * @param _orchestrator The address of the orchestrator contract
+   */
+  function initialize(address _orchestrator) public override {
+    super.initialize(_orchestrator);
+  }
+
+  /**
+   * @notice Set superior address
+   * @param _superior The address of the superior contract
+   */
+  function setSuperior(address _superior) external onlyCouncil {
     superior = _superior;
   }
 
@@ -182,6 +193,7 @@ contract RDS {
     balances[src] = balances[src].add(amount);
     totalSupply = totalSupply.add(amount);
     emit Transfer(address(0), src, amount);
+    _moveDelegates(address(0), delegates[src], amount);
   }
 
   /**
@@ -203,6 +215,7 @@ contract RDS {
     balances[src] = balances[src].sub(amount);
     totalSupply = totalSupply.sub(amount);
     emit Transfer(src, address(0), amount);
+    _moveDelegates(delegates[src], address(0), amount);
   }
 
   /**
@@ -351,5 +364,9 @@ contract RDS {
       chainId := chainid()
     }
     return chainId;
+  }
+
+  function errorDomain() internal override pure returns (uint8) {
+    return ERR_DOMAIN_DOL;
   }
 }

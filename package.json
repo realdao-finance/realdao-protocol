@@ -12,6 +12,7 @@
     "truffle-hdwallet-provider": "=1.0.17"
   },
   "devDependencies": {
+    "@openzeppelin/contracts": "^3.3.0",
     "ethlint": "=1.2.5",
     "prettier": "=2.0.5",
     "prettier-plugin-solidity": "=1.0.0-alpha.55",

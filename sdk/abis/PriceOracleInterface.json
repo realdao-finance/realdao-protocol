@@ -1,30 +1,5 @@
 [
   {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "operator",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "symbol",
-        "type": "string"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "addr",
-        "type": "address"
-      }
-    ],
-    "name": "NewPriceFeedAddress",
-    "type": "event"
-  },
-  {
     "inputs": [
       {
         "internalType": "address",
@@ -46,35 +21,17 @@
   {
     "inputs": [
       {
-        "internalType": "string",
-        "name": "symbol",
-        "type": "string"
+        "internalType": "string[]",
+        "name": "symbols",
+        "type": "string[]"
       },
       {
-        "internalType": "address",
-        "name": "addr",
-        "type": "address"
+        "internalType": "uint256[]",
+        "name": "prices",
+        "type": "uint256[]"
       }
     ],
-    "name": "setPriceFeedAddress",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "symbol",
-        "type": "string"
-      },
-      {
-        "internalType": "uint256",
-        "name": "price",
-        "type": "uint256"
-      }
-    ],
-    "name": "setUnderlyingPrice",
+    "name": "setUnderlyingPrices",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

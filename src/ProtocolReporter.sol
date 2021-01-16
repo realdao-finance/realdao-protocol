@@ -6,7 +6,7 @@ import "./interfaces/MarketControllerInterface.sol";
 import "./interfaces/PriceOracleInterface.sol";
 import "./interfaces/OrchestratorInterface.sol";
 import "./libraries/Strings.sol";
-import "./RErc20.sol";
+import "./RERC20.sol";
 import "./RToken.sol";
 import "./RDS.sol";
 
@@ -79,7 +79,7 @@ contract ProtocolReporter {
   function getMarketInfo(address rTokenAddr) public view returns (MarketInfo memory) {
     RToken rToken = RToken(rTokenAddr);
     uint256 exchangeRateCurrent = rToken.exchangeRateCurrent();
-    MarketControllerInterface controller = MarketControllerInterface(orchestrator.getMarketController());
+    MarketControllerInterface controller = MarketControllerInterface(orchestrator.getAddress("MARKET_CONTROLLER"));
     (uint256 state, uint256 collateralFactorMantissa) = controller.getMarket(address(rToken));
     address underlyingAssetAddress;
     uint256 underlyingDecimals;
@@ -91,10 +91,10 @@ contract ProtocolReporter {
       underlyingDecimals = 18;
       underlyingSymbol = "ETH";
     } else {
-      RErc20 rErc20 = RErc20(address(rToken));
-      underlyingAssetAddress = rErc20.underlying();
-      underlyingDecimals = EIP20Interface(rErc20.underlying()).decimals();
-      underlyingSymbol = EIP20Interface(rErc20.underlying()).symbol();
+      RERC20 rERC20 = RERC20(address(rToken));
+      underlyingAssetAddress = rERC20.underlying();
+      underlyingDecimals = EIP20Interface(rERC20.underlying()).decimals();
+      underlyingSymbol = EIP20Interface(rERC20.underlying()).symbol();
     }
 
     return
@@ -125,7 +125,7 @@ contract ProtocolReporter {
    * @return Array of MarketInfo object
    */
   function getAllMarketInfo() external view returns (MarketInfo[] memory) {
-    MarketControllerInterface controller = MarketControllerInterface(orchestrator.getMarketController());
+    MarketControllerInterface controller = MarketControllerInterface(orchestrator.getAddress("MARKET_CONTROLLER"));
     address[] memory rTokens = controller.getAllMarkets();
     MarketInfo[] memory res = new MarketInfo[](rTokens.length);
     for (uint256 i = 0; i < rTokens.length; i++) {
@@ -156,8 +156,8 @@ contract ProtocolReporter {
       underlyingSymbol = "ETH";
       underlyingDecimals = 18;
     } else {
-      RErc20 rErc20 = RErc20(address(rToken));
-      EIP20Interface underlying = EIP20Interface(rErc20.underlying());
+      RERC20 rERC20 = RERC20(address(rToken));
+      EIP20Interface underlying = EIP20Interface(rERC20.underlying());
       tokenBalance = underlying.balanceOf(account);
       tokenAllowance = underlying.allowance(account, address(rToken));
       underlyingSymbol = underlying.symbol();
@@ -183,7 +183,7 @@ contract ProtocolReporter {
    * @return Array of RTokenBalances object
    */
   function getAllRTokenBalances(address payable account) external view returns (RTokenBalances[] memory) {
-    MarketControllerInterface controller = MarketControllerInterface(orchestrator.getMarketController());
+    MarketControllerInterface controller = MarketControllerInterface(orchestrator.getAddress("MARKET_CONTROLLER"));
     address[] memory rTokens = controller.getAllMarkets();
     RTokenBalances[] memory res = new RTokenBalances[](rTokens.length);
     for (uint256 i = 0; i < rTokens.length; i++) {
@@ -199,7 +199,7 @@ contract ProtocolReporter {
    */
   function getUnderlyingPrice(address rTokenAddr) public view returns (RTokenUnderlyingPrice memory) {
     RToken rToken = RToken(rTokenAddr);
-    PriceOracleInterface oracle = PriceOracleInterface(orchestrator.getOracle());
+    PriceOracleInterface oracle = PriceOracleInterface(orchestrator.getAddress("ORACLE"));
     uint256 price = oracle.getUnderlyingPrice(rTokenAddr);
     return RTokenUnderlyingPrice({ rToken: rTokenAddr, anchorSymbol: rToken.anchorSymbol(), underlyingPrice: price });
   }
@@ -209,7 +209,7 @@ contract ProtocolReporter {
    * @return Array of RTokenUnderlyingPrice object
    */
   function getUnderlyingPrices() external view returns (RTokenUnderlyingPrice[] memory) {
-    MarketControllerInterface controller = MarketControllerInterface(orchestrator.getMarketController());
+    MarketControllerInterface controller = MarketControllerInterface(orchestrator.getAddress("MARKET_CONTROLLER"));
     address[] memory rTokens = controller.getAllMarkets();
     RTokenUnderlyingPrice[] memory res = new RTokenUnderlyingPrice[](rTokens.length);
     for (uint256 i = 0; i < rTokens.length; i++) {

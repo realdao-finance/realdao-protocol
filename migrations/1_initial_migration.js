@@ -1,5 +1,9 @@
 const Migrations = artifacts.require('Migrations')
 
-module.exports = function (deployer) {
-  // deployer.deploy(Migrations)
+async function main(deployer, network, accounts) {
+  console.log('network:', network)
+  console.log('accounts:', accounts)
+  await deployer.deploy(Migrations)
 }
+
+module.exports = main

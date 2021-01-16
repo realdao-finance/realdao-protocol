@@ -1,4 +1,3 @@
-const ABI_Supreme = require('../abis/Supreme.json')
 const ABI_Orchestrator = require('../abis/Orchestrator.json')
 const ABI_ProtocolReporter = require('../abis/ProtocolReporter.json')
 const ABI_MarketController = require('../abis/MarketController.json')
@@ -6,7 +5,7 @@ const ABI_Distributor = require('../abis/Distributor.json')
 const ABI_DOL = require('../abis/DOL.json')
 const ABI_RDS = require('../abis/RDS.json')
 const ABI_REther = require('../abis/REther.json')
-const ABI_RErc20 = require('../abis/RErc20.json')
+const ABI_RERC20 = require('../abis/RERC20.json')
 const ABI_RDOL = require('../abis/RDOL.json')
 const ABI_Oracle = require('../abis/PriceOracleInterface.json')
 const ABI_EIP20Interface = require('../abis/EIP20Interface.json')
@@ -21,11 +20,11 @@ class RealDAO {
     if (!options.Web3) throw new Error('Web3 required')
 
     this.Web3 = options.Web3
-    this._network = options.network || Networks.live
-    this._supremeAddress = options.supremeAddress || this._network.supremeAddress
-    if (!options.supremeAddress) {
-      this._orchestratorAddress = options.orchestratorAddress || this._network.orchestratorAddress
-    }
+    this._env = options.env || 'mainnet'
+    this._network = Networks[this._env]
+    if (!this._network) throw new Error('Invalid env')
+
+    this._orchestratorAddress = options.orchestrator || this._network.orchestrator
 
     this.setProvider(options.provider || this._network.provider)
   }
@@ -35,10 +34,7 @@ class RealDAO {
 
     this.provider = provider
     this._web3 = new this.Web3(this.provider)
-    this._supreme = this._createContractInstance(ABI_Supreme, this._supremeAddress)
-    if (this._orchestratorAddress) {
-      this._orchestrator = this._createContractInstance(ABI_Orchestrator, this._orchestratorAddress)
-    }
+    this._orchestrator = this._createContractInstance(ABI_Orchestrator, this._orchestratorAddress)
     this._dol = null
     this._rds = null
     this._reporter = null
@@ -62,53 +58,51 @@ class RealDAO {
     return !!tx && !!tx.blockHash
   }
 
-  async loadOrchestrator() {
-    if (this._orchestrator) return
-    this._orchestratorAddress = await this.supreme().orchestrator().call()
-    this._orchestrator = this._createContractInstance(ABI_Orchestrator, this._orchestratorAddress)
+  async loadDOL() {
+    if (!this._dol) this._dol = await this._createProtocolContractInstance(ABI_DOL, 'DOL')
   }
 
-  async loadDOL() {
-    if (!this._dol) this._dol = await this._createProtocolContractInstance(ABI_DOL, 'getDOL')
-  }
   async loadRDS() {
-    if (!this._rds) this._rds = await this._createProtocolContractInstance(ABI_RDS, 'getRDS')
+    if (!this._rds) this._rds = await this._createProtocolContractInstance(ABI_RDS, 'RDS')
   }
+
   async loadReporter() {
-    if (!this._reporter)
-      this._reporter = await this._createProtocolContractInstance(ABI_ProtocolReporter, 'getReporter')
+    if (!this._reporter) this._reporter = await this._createProtocolContractInstance(ABI_ProtocolReporter, 'REPORTER')
   }
+
   async loadController() {
     if (!this._controller) {
-      this._controller = await this._createProtocolContractInstance(ABI_MarketController, 'getMarketController')
+      this._controller = await this._createProtocolContractInstance(ABI_MarketController, 'MARKET_CONTROLLER')
     }
   }
+
   async loadDistributor() {
     if (!this._distributor) {
-      this._distributor = await this._createProtocolContractInstance(ABI_Distributor, 'getDistributor')
+      this._distributor = await this._createProtocolContractInstance(ABI_Distributor, 'DISTRIBUTOR')
     }
   }
+
   async loadOracle() {
     if (!this._oracle) {
-      this._oracle = await this._createProtocolContractInstance(ABI_Oracle, 'getOracle')
+      this._oracle = await this._createProtocolContractInstance(ABI_Oracle, 'ORACLE')
     }
   }
+
   async loadInterestRateModel() {
     if (!this._interestRateModel) {
-      this._interestRateModel = await this._createProtocolContractInstance(
-        ABI_InterestRateModel,
-        'getInterestRateModel'
-      )
+      this._interestRateModel = await this._createProtocolContractInstance(ABI_InterestRateModel, 'INTEREST_RATE_MODEL')
     }
   }
+
   async loadCouncil() {
     if (!this._council) {
-      this._council = await this._createProtocolContractInstance(ABI_Council, 'getCouncil')
+      this._council = await this._createProtocolContractInstance(ABI_Council, 'COUNIL')
     }
   }
+
   async loadDemocracy() {
     if (!this._democracy) {
-      this._democracy = await this._createProtocolContractInstance(ABI_Democracy, 'getDemocracy')
+      this._democracy = await this._createProtocolContractInstance(ABI_Democracy, 'DEMOCRACY')
     }
   }
 
@@ -124,7 +118,7 @@ class RealDAO {
         this._rDOL = this._createContractInstance(ABI_RDOL, market.rToken)
         this._rTokens[market.underlyingSymbol] = this._rDOL
       } else {
-        const instance = this._createContractInstance(ABI_RErc20, market.rToken)
+        const instance = this._createContractInstance(ABI_RERC20, market.rToken)
         this._rTokens[market.underlyingSymbol] = instance
       }
     }
@@ -199,15 +193,15 @@ class RealDAO {
     return raw ? this._rTokens[underlyingSymbol] : this._rTokens[underlyingSymbol].methods
   }
 
-  getErc20Token(addr, raw) {
+  getERC20Token(addr, raw) {
     if (!this._erc20Tokens[addr]) {
       this._erc20Tokens[addr] = this._createContractInstance(ABI_EIP20Interface, addr)
     }
     return raw ? this._erc20Tokens[addr] : this._erc20Tokens[addr].methods
   }
 
-  async _createProtocolContractInstance(abi, getAddrMethod) {
-    const addr = await this._orchestrator.methods[getAddrMethod].call().call()
+  async _createProtocolContractInstance(abi, key) {
+    const addr = await this._orchestrator.methods.getAddress(key).call()
     return new this._web3.eth.Contract(abi, addr)
   }
 

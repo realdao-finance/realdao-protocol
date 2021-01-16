@@ -3,7 +3,7 @@ pragma solidity ^0.6.0;
 interface MarketControllerInterface {
   function initialize(address orchestrator) external;
 
-  function bind(address[] calldata parts) external;
+  function bind(address lib) external;
 
   function isLiquidating(address rToken) external view returns (bool);
 

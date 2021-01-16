@@ -1,13 +1,13 @@
 pragma solidity ^0.6.0;
 
-import "./RErc20.sol";
+import "./RERC20.sol";
 import "./DOL.sol";
 
 /**
  * @title RDOL contract (EIP-20 compatible)
  * @notice DOL lending and forging market
  */
-contract RDOL is RErc20 {
+contract RDOL is RERC20 {
   event SystemSupplied(uint256 amount);
   event SystemReduced(uint256 amount);
 
@@ -17,7 +17,6 @@ contract RDOL is RErc20 {
     address[] memory parts
   ) public {
     super.initialize(_orchestrator, _underlying, "RealdDAO wrapped DOL", "rDOL", "USD", parts);
-    DOL(_underlying).initialize(address(this));
 
     uint256 dolFirstSupply = 1e16; // 100 million
     increaseSystemSupplyInternal(dolFirstSupply);

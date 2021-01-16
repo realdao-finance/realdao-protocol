@@ -23,14 +23,13 @@ class Service {
     this.options = options
     this.realdao = new RealDAO({
       Web3,
-      network: RealDAO.Networks[env.current],
+      env: env.current,
       provider: env.networks[env.current].provider,
-      supremeAddress: env.networks[env.current].supremeAddress,
+      orchestrator: env.networks[env.current].orchestrator,
     })
   }
 
   async initialize() {
-    await this.realdao.loadOrchestrator()
     await this.realdao.loadRTokens()
     await this.realdao.loadReporter()
     await this.realdao.loadController()

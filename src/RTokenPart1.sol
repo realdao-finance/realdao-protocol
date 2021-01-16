@@ -34,7 +34,7 @@ contract RTokenPart1 is RTokenBase {
   function mintFresh(address minter, uint256 mintAmount) internal {
     expect(accrualBlockNumber == getBlockNumber(), ERR_FRESHNESS_CHECK, "RToken/accrual block number check failed");
 
-    MarketControllerInterface controller = MarketControllerInterface(orchestrator.getMarketController());
+    MarketControllerInterface controller = MarketControllerInterface(orchestrator.getAddress("MARKET_CONTROLLER"));
     uint256 allowed = controller.mintAllowed(address(this), minter, mintAmount);
     checkBusiness(allowed == 0, ERR_CONTROLLER_REJECTION, "RToken/want mint but controller rejected");
 
@@ -156,7 +156,7 @@ contract RTokenPart1 is RTokenBase {
     }
     expect(accrualBlockNumber == getBlockNumber(), ERR_FRESHNESS_CHECK, "RToken/accrual block number check failed");
 
-    MarketControllerInterface controller = MarketControllerInterface(orchestrator.getMarketController());
+    MarketControllerInterface controller = MarketControllerInterface(orchestrator.getAddress("MARKET_CONTROLLER"));
     uint256 allowed = controller.redeemAllowed(address(this), redeemer, vars.redeemTokens);
     checkBusiness(allowed == 0, ERR_CONTROLLER_REJECTION, "RToken/want redeem but controller rejected");
 
@@ -223,7 +223,7 @@ contract RTokenPart1 is RTokenBase {
   function borrowFresh(address payable borrower, uint256 borrowAmount) internal {
     expect(accrualBlockNumber == getBlockNumber(), ERR_FRESHNESS_CHECK, "RToken/accrual block number check failed");
 
-    MarketControllerInterface controller = MarketControllerInterface(orchestrator.getMarketController());
+    MarketControllerInterface controller = MarketControllerInterface(orchestrator.getAddress("MARKET_CONTROLLER"));
     uint256 allowed = controller.borrowAllowed(address(this), borrower, borrowAmount);
     checkBusiness(allowed == 0, ERR_CONTROLLER_REJECTION, "RToken/want borrow but controller rejected");
 

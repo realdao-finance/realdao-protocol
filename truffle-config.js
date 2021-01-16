@@ -22,25 +22,32 @@ module.exports = {
     },
     ropsten: {
       provider: function () {
-        return new HDWalletProvider([networks.ropsten.privateKey], networks.ropsten.provider)
+        return new HDWalletProvider([env.privateKey], networks.ropsten.provider)
       },
       network_id: 3,
       gas: 8000000,
     },
     kovan: {
       provider: function () {
-        return new HDWalletProvider([networks.kovan.privateKey], networks.kovan.provider)
+        return new HDWalletProvider([env.privateKey], networks.kovan.provider)
       },
       network_id: 42,
       gas: 8000000,
     },
-    live: {
+    testnet: {
       provider: function () {
-        return new HDWalletProvider([networks.live.privateKey], networks.live.provider)
+        return new HDWalletProvider([env.privateKey], networks.testnet.provider)
       },
-      network_id: 1,
+      network_id: 256,
       gas: 8000000,
-      gasPrice: networks.live.gasPrice,
+    },
+    mainnet: {
+      provider: function () {
+        return new HDWalletProvider([env.privateKey], networks.mainnet.provider)
+      },
+      network_id: 128,
+      gas: 8000000,
+      // gasPrice: env.gasPrice,
     },
   },
 }

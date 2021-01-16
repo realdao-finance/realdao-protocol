@@ -17,8 +17,8 @@ abstract contract AuthBase is ErrorBase {
 
     address sender = msg.sender;
     address guardian = orchestrator.guardian();
-    address council = orchestrator.getCouncil();
-    address democracy = orchestrator.getDemocracy();
+    address council = orchestrator.getAddress("COUNCIL");
+    address democracy = orchestrator.getAddress("DEMOCRACY");
     check(
       sender == council || sender == democracy || sender == guardian || sender == superior,
       ERR_TYPE_AUTH,
@@ -32,7 +32,7 @@ abstract contract AuthBase is ErrorBase {
     expect(address(orchestrator) != address(0), ERR_NOT_INITIALIZED, "AuthBase/not initialized");
 
     address guardian = orchestrator.guardian();
-    address democracy = orchestrator.getDemocracy();
+    address democracy = orchestrator.getAddress("DEMOCRACY");
     check(
       msg.sender != democracy || msg.sender != guardian,
       ERR_TYPE_AUTH,

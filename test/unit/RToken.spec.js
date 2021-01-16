@@ -4,7 +4,7 @@ const RDS = artifacts.require('RDS')
 const Distributor = artifacts.require('Distributor')
 const MockPriceOracle = artifacts.require('MockPriceOracle')
 const InterestRateModel = artifacts.require('InterestRateModel')
-const MarketControllerPart1 = artifacts.require('MarketControllerPart1')
+const MarketControllerLibrary = artifacts.require('MarketControllerLibrary')
 const MarketController = artifacts.require('MarketController')
 const RTokenPart1 = artifacts.require('RTokenPart1')
 const RTokenPart2 = artifacts.require('RTokenPart2')
@@ -34,7 +34,7 @@ let oracle
 let distributor
 let rds
 let dol
-let controllerParts
+let controllerLib
 let controller
 let rTokenParts
 let rETH
@@ -52,8 +52,8 @@ async function deployContracts() {
   rds = await RDS.deployed()
   dol = await DOL.deployed()
 
-  const controllerPart1 = await MarketControllerPart1.deployed()
-  controllerParts = [controllerPart1.address]
+  const ControllerLibrary = await MarketControllerLibrary.deployed()
+  controllerLib = ControllerLibrary.address
   controller = await MarketController.deployed()
 
   const rTokenPart1 = await RTokenPart1.deployed()
@@ -81,7 +81,7 @@ async function initializeContracts() {
   await rds.initialize(distributor.address)
   await distributor.initialize(orchestrator.address)
   await controller.initialize(orchestrator.address)
-  await controller.bind(controllerParts)
+  await controller.bind(controllerLib)
   await reporter.initialize(orchestrator.address)
 
   await rETH.initialize(orchestrator.address, rTokenParts)

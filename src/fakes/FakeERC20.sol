@@ -1,10 +1,10 @@
 pragma solidity ^0.6.0;
 
-contract MockErc20 {
-  string public constant name = "Uniswap V2";
-  string public constant symbol = "UNI-V2";
-  uint8 public constant decimals = 8;
-  uint256 public totalSupply = 100000000e8;
+contract FakeERC20 {
+  string public name;
+  string public symbol;
+  uint8 public decimals;
+  uint256 public totalSupply;
 
   mapping(address => uint256) balances;
   mapping(address => mapping(address => uint256)) allowed;
@@ -12,9 +12,18 @@ contract MockErc20 {
   event Transfer(address indexed from, address indexed to, uint256 amount);
   event Approval(address indexed owner, address indexed spender, uint256 amount);
 
-  constructor() public {
-    balances[msg.sender] = totalSupply;
-    emit Transfer(address(0), msg.sender, totalSupply);
+  constructor(
+    string memory _name,
+    string memory _symbol,
+    uint8 _decimals,
+    uint256 _initialIssue
+  ) public {
+    name = _name;
+    symbol = _symbol;
+    decimals = _decimals;
+    totalSupply = _initialIssue;
+    balances[msg.sender] = _initialIssue;
+    emit Transfer(address(0), msg.sender, _initialIssue);
   }
 
   function balanceOf(address tokenOwner) external view returns (uint256) {

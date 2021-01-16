@@ -1,12 +1,11 @@
 pragma solidity ^0.6.0;
 
-import "../interfaces/PriceOracleInterface.sol";
 import "../interfaces/EIP20Interface.sol";
 import "../interfaces/RTokenInterface.sol";
 import "../libraries/Strings.sol";
 import "../libraries/SafeMath.sol";
 
-contract MockPriceOracle is PriceOracleInterface {
+contract MockPriceOracle {
   using SafeMath for uint256;
 
   address public admin;
@@ -18,7 +17,7 @@ contract MockPriceOracle is PriceOracleInterface {
     prices["USD"] = 1e8;
   }
 
-  function getUnderlyingPrice(address rTokenAddr) external override view returns (uint256) {
+  function getUnderlyingPrice(address rTokenAddr) external view returns (uint256) {
     RTokenInterface rToken = RTokenInterface(rTokenAddr);
     string memory symbol = rToken.anchorSymbol();
     uint256 underlyingDecimals;
@@ -32,12 +31,8 @@ contract MockPriceOracle is PriceOracleInterface {
     return price.mul(10**(18 - underlyingDecimals));
   }
 
-  function setUnderlyingPrice(string calldata symbol, uint256 price) external override {
+  function setUnderlyingPrice(string calldata symbol, uint256 price) external {
     prices[symbol] = price;
-  }
-
-  function setPriceFeedAddress(string calldata symbol, address addr) external override {
-    emit NewPriceFeedAddress(msg.sender, symbol, addr);
   }
 
   function getPrice(string memory symbol) internal view returns (uint256) {

@@ -132,7 +132,7 @@ contract RTokenBase is AuthBase, Exponential {
 
   modifier onlyController() {
     check(
-      msg.sender == orchestrator.getMarketController(),
+      msg.sender == orchestrator.getAddress("MARKET_CONTROLLER"),
       ERR_TYPE_AUTH,
       ERR_ONLY_CONTROLLER,
       "RToken/only controller is allowed"
@@ -227,7 +227,7 @@ contract RTokenBase is AuthBase, Exponential {
     uint256 borrowIndexPrior = borrowIndex;
 
     /* Calculate the current borrow interest rate */
-    InterestRateModelInterface irm = InterestRateModelInterface(orchestrator.getInterestRateModel());
+    InterestRateModelInterface irm = InterestRateModelInterface(orchestrator.getAddress("INTEREST_RATE_MODEL"));
     uint256 borrowRateMantissa = irm.getBorrowRate(cashPrior, borrowsPrior, reservesPrior);
     checkBusiness(
       borrowRateMantissa <= borrowRateMaxMantissa,
@@ -389,7 +389,7 @@ contract RTokenBase is AuthBase, Exponential {
     address borrower,
     uint256 seizeTokens
   ) internal {
-    MarketControllerInterface controller = MarketControllerInterface(orchestrator.getMarketController());
+    MarketControllerInterface controller = MarketControllerInterface(orchestrator.getAddress("MARKET_CONTROLLER"));
     uint256 allowed = controller.seizeAllowed(address(this), seizerToken, liquidator, borrower, seizeTokens);
     checkBusiness(allowed == 0, ERR_CONTROLLER_REJECTION, "RToken/want seize but controller rejected");
 
@@ -425,7 +425,7 @@ contract RTokenBase is AuthBase, Exponential {
   }
 
   function updatePowerInternal(address account) internal {
-    DistributorInterface distributor = DistributorInterface(orchestrator.getDistributor());
+    DistributorInterface distributor = DistributorInterface(orchestrator.getAddress("DISTRIBUTOR"));
     if (distributor.isPoolActive(address(this))) {
       MathError mathErr;
       uint256 supplyPower;

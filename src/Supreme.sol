@@ -34,7 +34,7 @@ contract Supreme {
 
     OrchestratorInterface oi = OrchestratorInterface(orchestrator);
     address sender = msg.sender;
-    require(sender == oi.guardian() || sender == oi.getDemocracy(), "Supreme/permission denied");
+    require(sender == oi.guardian() || sender == oi.getAddress("DEMOCRACY"), "Supreme/permission denied");
 
     address payable proxyAddr = address(uint160(orchestrator));
     UpgradableProxy proxy = UpgradableProxy(proxyAddr);

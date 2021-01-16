@@ -5,10 +5,10 @@ import "./RToken.sol";
 import "./DOL.sol";
 
 /**
- * @title RealDAO' RErc20 Contract
+ * @title RealDAO' RERC20 Contract
  * @notice RTokens which wrap an EIP-20 underlying
  */
-contract RErc20 is RToken {
+contract RERC20 is RToken {
   /**
    * @notice Initialize the new money market
    * @param _orchestrator The address of the orchestrator

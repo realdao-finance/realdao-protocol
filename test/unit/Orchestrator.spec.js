@@ -3,7 +3,7 @@ const { expectSuccess, expectRevert } = require('../util/expect')
 const { advanceBlocks } = require('../util/advance')
 const MockPriceOracle = artifacts.require('MockPriceOracle')
 const InterestRateModel = artifacts.require('InterestRateModel')
-const MarketControllerPart1 = artifacts.require('MarketControllerPart1')
+const MarketControllerLibrary = artifacts.require('MarketControllerLibrary')
 const MarketController = artifacts.require('MarketController')
 const Distributor = artifacts.require('Distributor')
 const Council = artifacts.require('Council')
@@ -46,7 +46,7 @@ async function initializeContracts() {
   const oracleImpl = await MockPriceOracle.deployed()
   const interestRateImpl = await InterestRateModel.deployed()
 
-  await MarketControllerPart1.deployed()
+  await MarketControllerLibrary.deployed()
   const controllerImpl = await MarketController.deployed()
   const distributorImpl = await Distributor.deployed()
   const councilImpl = await Council.deployed()
@@ -65,7 +65,7 @@ async function initializeContracts() {
   await MockMarketControllerV2.deployed()
 
   await orchestrator.initialize(
-    [MarketControllerPart1.address],
+    [MarketControllerLibrary.address],
     [
       controllerImpl.address,
       distributorImpl.address,

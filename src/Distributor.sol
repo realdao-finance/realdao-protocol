@@ -36,6 +36,7 @@ contract Distributor is AuthBase {
     uint256 accumulatedTokens;
     uint256 totalPower;
     uint256 startBlock;
+    uint32 weight;
   }
 
   struct DistributorStats {
@@ -44,6 +45,7 @@ contract Distributor is AuthBase {
     uint256 nextHalvingBlock;
     uint32 activePools;
     uint32 totalPools;
+    uint32 totalWeight;
   }
 
   uint256 public rewardsPerBlock;
@@ -51,6 +53,7 @@ contract Distributor is AuthBase {
   uint256 public nextHalvingBlock;
 
   uint32 public activePools = 0;
+  uint32 public totalWeight = 0;
 
   Pool[] pools;
   mapping(uint32 => mapping(address => AccountRecord)) accountRecords;
@@ -74,7 +77,7 @@ contract Distributor is AuthBase {
   uint8 constant ERR_POOL_IS_CLOSED = 5;
   uint8 constant ERR_AMOUNT_ZERO = 6;
   uint8 constant ERR_POOL_NOT_STARTED = 7;
-  uint8 constant ERR_START_BLOCK_SMALL = 8;
+  uint8 constant ERR_DELAY_BLOCK_SMALL = 8;
   uint8 constant ERR_POOL_ALREADY_CREATED = 9;
   uint8 constant ERR_POOL_ALREADY_STARTED = 10;
   uint8 constant ERR_TRANSFER_IN_FAILED = 11;
@@ -94,7 +97,7 @@ contract Distributor is AuthBase {
   event MinerExited(address miner, uint256 id, uint256 amount);
 
   modifier onlyListedMarket {
-    Controller controller = Controller(orchestrator.getMarketController());
+    Controller controller = Controller(orchestrator.getAddress("MARKET_CONTROLLER"));
     checkBusiness(controller.isListedMarket(msg.sender), ERR_MARKET_NOT_LISTED, "Distributor/market is not listed");
     _;
   }
@@ -205,7 +208,7 @@ contract Distributor is AuthBase {
    */
   function closeLendingPool(address rToken) external {
     check(
-      orchestrator.getMarketController() == msg.sender,
+      orchestrator.getAddress("MARKET_CONTROLLER") == msg.sender,
       ERR_TYPE_AUTH,
       ERR_ONLY_CONTROLLER,
       "Distributor/only market controller is allowed"
@@ -291,7 +294,8 @@ contract Distributor is AuthBase {
         mineStartBlock: mineStartBlock,
         nextHalvingBlock: nextHalvingBlock,
         activePools: activePools,
-        totalPools: uint32(pools.length)
+        totalPools: uint32(pools.length),
+        totalWeight: totalWeight
       });
   }
 
@@ -302,12 +306,17 @@ contract Distributor is AuthBase {
   /**
    * @notice Create a new lending pool for a money market with a specific delay before launching
    * @param rToken Address of the money market bound with the new created pool
-   * @param startBlock When will the pool be launched
+   * @param weight The distribution weight of the pool
+   * @param delay The pool can be launched after some delay blocks
    */
-  function createLendingPool(address rToken, uint256 startBlock) external onlyCouncil {
-    checkParams(startBlock > getCurrentBlockNumber(), ERR_START_BLOCK_SMALL, "Distributor/startBlock too small");
+  function createLendingPool(
+    address rToken,
+    uint32 weight,
+    uint256 delay
+  ) external onlyCouncil {
+    checkParams(delay > 0, ERR_DELAY_BLOCK_SMALL, "Distributor/delay block too small");
 
-    bool isListed = Controller(orchestrator.getMarketController()).isListedMarket(rToken);
+    bool isListed = Controller(orchestrator.getAddress("MARKET_CONTROLLER")).isListedMarket(rToken);
     checkBusiness(isListed, ERR_MARKET_NOT_LISTED, "Distributor/market is not listed");
     checkBusiness(
       tokenToPoolSeq[rToken] == 0,
@@ -316,6 +325,7 @@ contract Distributor is AuthBase {
     );
 
     uint32 id = uint32(pools.length);
+    uint256 startBlock = block.number + delay;
     Pool memory pool = Pool({
       id: id,
       ptype: POOL_TYPE_LENDING,
@@ -326,7 +336,8 @@ contract Distributor is AuthBase {
       accumulatedPower: 0,
       accumulatedTokens: 0,
       totalPower: 0,
-      startBlock: startBlock
+      startBlock: startBlock,
+      weight: weight
     });
     pools.push(pool);
     tokenToPoolSeq[rToken] = id + 1;
@@ -337,10 +348,15 @@ contract Distributor is AuthBase {
   /**
    * @notice Create a new exchanging pool for a LP token with a specific delay before launching
    * @param lpToken Address of the LP token bound with the new created pool
-   * @param startBlock When will the pool be launched
+   * @param weight The distribution weight of the pool
+   * @param delay The pool can be launched after some delay blocks
    */
-  function createExchangingPool(address lpToken, uint256 startBlock) external onlyCouncil {
-    checkParams(startBlock > getCurrentBlockNumber(), ERR_START_BLOCK_SMALL, "Distributor/startBlock too small");
+  function createExchangingPool(
+    address lpToken,
+    uint32 weight,
+    uint256 delay
+  ) external onlyCouncil {
+    checkParams(delay > 0, ERR_DELAY_BLOCK_SMALL, "Distributor/delay block too small");
     checkBusiness(
       tokenToPoolSeq[lpToken] == 0,
       ERR_POOL_ALREADY_CREATED,
@@ -348,6 +364,7 @@ contract Distributor is AuthBase {
     );
 
     uint32 id = uint32(pools.length);
+    uint256 startBlock = block.number + delay;
     Pool memory pool = Pool({
       id: id,
       ptype: POOL_TYPE_EXCHANGING,
@@ -358,7 +375,8 @@ contract Distributor is AuthBase {
       accumulatedPower: 0,
       accumulatedTokens: 0,
       totalPower: 0,
-      startBlock: startBlock
+      startBlock: startBlock,
+      weight: weight
     });
     pools.push(pool);
     tokenToPoolSeq[lpToken] = id + 1;
@@ -396,6 +414,7 @@ contract Distributor is AuthBase {
       }
     }
     activePools -= 1;
+    totalWeight -= pool.weight;
     pool.state = POOL_STATE_CLOSED;
     emit PoolClosed(pool.id);
   }
@@ -430,7 +449,7 @@ contract Distributor is AuthBase {
         ERR_TOTAL_POWER_CALC,
         "Distributor/Calculate total power failed"
       );
-      uint256 newMinedTokens = tokenMinedWithin(pool.lastBlockNumber, currentBlockNumber);
+      uint256 newMinedTokens = tokenMinedWithin(pool.lastBlockNumber, currentBlockNumber, pool.weight);
       if (pool.totalPower != 0) {
         uint256 totalMinedTokens = pool.accumulatedTokens.add(newMinedTokens);
         pool.rewardIndex = pool.rewardIndex.add(totalMinedTokens.mul(MANTISSA).div(pool.totalPower));
@@ -459,8 +478,9 @@ contract Distributor is AuthBase {
     pool.state = POOL_STATE_ACTIVE;
     pool.lastBlockNumber = currentBlockNumber;
     activePools += 1;
+    totalWeight += pool.weight;
     if (mineStartBlock == 0) {
-      uint256 decimals = RDS(orchestrator.getRDS()).decimals();
+      uint256 decimals = RDS(orchestrator.getAddress("RDS")).decimals();
       rewardsPerBlock = 4 * (10**decimals);
       mineStartBlock = currentBlockNumber;
       nextHalvingBlock = currentBlockNumber.add(BLOCKS_PER_YEAR);
@@ -474,7 +494,7 @@ contract Distributor is AuthBase {
     uint256 rewardIndex = pool.rewardIndex;
     uint256 claimed = rewardIndex.mul(record.power).sub(record.mask).div(MANTISSA).add(record.settled);
     if (claimed > 0) {
-      RDS(orchestrator.getRDS()).mint(msg.sender, claimed);
+      RDS(orchestrator.getAddress("RDS")).mint(msg.sender, claimed);
       record.claimed = record.claimed.add(claimed);
       record.settled = 0;
     }
@@ -553,8 +573,12 @@ contract Distributor is AuthBase {
     }
   }
 
-  function tokenMinedWithin(uint256 startBlock, uint256 endBlock) internal view returns (uint256) {
-    return (endBlock - startBlock).mul(rewardsPerBlock).div(activePools);
+  function tokenMinedWithin(
+    uint256 startBlock,
+    uint256 endBlock,
+    uint32 weight
+  ) internal view returns (uint256) {
+    return (endBlock - startBlock).mul(rewardsPerBlock).mul(weight).div(totalWeight);
   }
 
   function getCurrentBlockNumber() internal view returns (uint256) {

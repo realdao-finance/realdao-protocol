@@ -98,7 +98,8 @@
       }
     ],
     "stateMutability": "view",
-    "type": "function"
+    "type": "function",
+    "constant": true
   },
   {
     "inputs": [],
@@ -111,7 +112,8 @@
       }
     ],
     "stateMutability": "view",
-    "type": "function"
+    "type": "function",
+    "constant": true
   },
   {
     "inputs": [],
@@ -124,7 +126,8 @@
       }
     ],
     "stateMutability": "view",
-    "type": "function"
+    "type": "function",
+    "constant": true
   },
   {
     "inputs": [],
@@ -137,7 +140,8 @@
       }
     ],
     "stateMutability": "view",
-    "type": "function"
+    "type": "function",
+    "constant": true
   },
   {
     "inputs": [],
@@ -150,7 +154,22 @@
       }
     ],
     "stateMutability": "view",
-    "type": "function"
+    "type": "function",
+    "constant": true
+  },
+  {
+    "inputs": [],
+    "name": "totalWeight",
+    "outputs": [
+      {
+        "internalType": "uint32",
+        "name": "",
+        "type": "uint32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
   },
   {
     "inputs": [
@@ -270,7 +289,8 @@
       }
     ],
     "stateMutability": "view",
-    "type": "function"
+    "type": "function",
+    "constant": true
   },
   {
     "inputs": [
@@ -333,6 +353,11 @@
             "internalType": "uint256",
             "name": "startBlock",
             "type": "uint256"
+          },
+          {
+            "internalType": "uint32",
+            "name": "weight",
+            "type": "uint32"
           }
         ],
         "internalType": "struct Distributor.Pool",
@@ -341,7 +366,8 @@
       }
     ],
     "stateMutability": "view",
-    "type": "function"
+    "type": "function",
+    "constant": true
   },
   {
     "inputs": [],
@@ -398,6 +424,11 @@
             "internalType": "uint256",
             "name": "startBlock",
             "type": "uint256"
+          },
+          {
+            "internalType": "uint32",
+            "name": "weight",
+            "type": "uint32"
           }
         ],
         "internalType": "struct Distributor.Pool[]",
@@ -406,7 +437,8 @@
       }
     ],
     "stateMutability": "view",
-    "type": "function"
+    "type": "function",
+    "constant": true
   },
   {
     "inputs": [],
@@ -419,7 +451,8 @@
       }
     ],
     "stateMutability": "view",
-    "type": "function"
+    "type": "function",
+    "constant": true
   },
   {
     "inputs": [
@@ -460,7 +493,8 @@
       }
     ],
     "stateMutability": "view",
-    "type": "function"
+    "type": "function",
+    "constant": true
   },
   {
     "inputs": [
@@ -506,7 +540,8 @@
       }
     ],
     "stateMutability": "view",
-    "type": "function"
+    "type": "function",
+    "constant": true
   },
   {
     "inputs": [],
@@ -538,6 +573,11 @@
             "internalType": "uint32",
             "name": "totalPools",
             "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "totalWeight",
+            "type": "uint32"
           }
         ],
         "internalType": "struct Distributor.DistributorStats",
@@ -546,7 +586,8 @@
       }
     ],
     "stateMutability": "view",
-    "type": "function"
+    "type": "function",
+    "constant": true
   },
   {
     "inputs": [
@@ -556,8 +597,13 @@
         "type": "address"
       },
       {
+        "internalType": "uint32",
+        "name": "weight",
+        "type": "uint32"
+      },
+      {
         "internalType": "uint256",
-        "name": "startBlock",
+        "name": "delay",
         "type": "uint256"
       }
     ],
@@ -574,8 +620,13 @@
         "type": "address"
       },
       {
+        "internalType": "uint32",
+        "name": "weight",
+        "type": "uint32"
+      },
+      {
         "internalType": "uint256",
-        "name": "startBlock",
+        "name": "delay",
         "type": "uint256"
       }
     ],

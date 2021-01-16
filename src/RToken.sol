@@ -196,7 +196,7 @@ contract RToken is RTokenBase {
    * @return The supply interest rate per block, scaled by 1e18
    */
   function supplyRatePerBlock() external view returns (uint256) {
-    InterestRateModelInterface irm = InterestRateModelInterface(orchestrator.getInterestRateModel());
+    InterestRateModelInterface irm = InterestRateModelInterface(orchestrator.getAddress("INTEREST_RATE_MODEL"));
     return irm.getSupplyRate(getCashPrior(), totalBorrows, totalReserves, reserveFactorMantissa);
   }
 
@@ -205,7 +205,7 @@ contract RToken is RTokenBase {
    * @return The borrow interest rate per block, scaled by 1e18
    */
   function borrowRatePerBlock() external view returns (uint256) {
-    InterestRateModelInterface irm = InterestRateModelInterface(orchestrator.getInterestRateModel());
+    InterestRateModelInterface irm = InterestRateModelInterface(orchestrator.getAddress("INTEREST_RATE_MODEL"));
     return irm.getBorrowRate(getCashPrior(), totalBorrows, totalReserves);
   }
 

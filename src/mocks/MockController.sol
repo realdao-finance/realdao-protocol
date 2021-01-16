@@ -21,11 +21,14 @@ contract MockController {
   }
 
   function closePool(address token) external {
-    DistributorInterface(orchestrator.getDistributor()).closeLendingPool(token);
+    DistributorInterface(orchestrator.getAddress("DISTRIBUTOR")).closeLendingPool(token);
   }
 
   function writeByCouncil(uint256 newVal) external {
-    require(msg.sender == OrchestratorInterface(orchestrator).getCouncil(), "MockController/permission denied");
+    require(
+      msg.sender == OrchestratorInterface(orchestrator).getAddress("COUNCIL"),
+      "MockController/permission denied"
+    );
     val = newVal;
   }
 }

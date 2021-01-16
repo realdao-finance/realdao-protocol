@@ -2,11 +2,12 @@ pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import "./libraries/SafeMath.sol";
+import "./AuthBase.sol";
 
 /**
  * @title DOL stablecoin contract (EIP-20 compatible)
  */
-contract DOL {
+contract DOL is AuthBase {
   using SafeMath for uint256;
 
   /// @notice EIP-20 token name for this token
@@ -42,8 +43,19 @@ contract DOL {
     _;
   }
 
-  function initialize(address _superior) external {
-    require(superior == address(0), "DOL/already initialized");
+  /**
+   * @notice Initialize the DOL contract
+   * @param _orchestrator The address of the orchestrator contract
+   */
+  function initialize(address _orchestrator) public override {
+    super.initialize(_orchestrator);
+  }
+
+  /**
+   * @notice Set superior address
+   * @param _superior The address of the superior contract
+   */
+  function setSuperior(address _superior) external onlyCouncil {
     superior = _superior;
   }
 
@@ -166,5 +178,9 @@ contract DOL {
       chainId := chainid()
     }
     return chainId;
+  }
+
+  function errorDomain() internal override pure returns (uint8) {
+    return ERR_DOMAIN_DOL;
   }
 }

@@ -8,7 +8,7 @@ function main(argv) {
     'RDS',
     'DOL',
     'REther',
-    'RErc20',
+    'RERC20',
     'RDOL',
     'Orchestrator',
     'Supreme',

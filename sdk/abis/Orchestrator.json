@@ -82,19 +82,6 @@
   },
   {
     "inputs": [],
-    "name": "distributorFinal",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "guardian",
     "outputs": [
       {
@@ -104,47 +91,15 @@
       }
     ],
     "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "orchestrator",
-    "outputs": [
-      {
-        "internalType": "contract OrchestratorInterface",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
+    "type": "function",
+    "constant": true
   },
   {
     "inputs": [
-      {
-        "internalType": "address[]",
-        "name": "_controllerParts",
-        "type": "address[]"
-      },
       {
         "internalType": "address[]",
         "name": "_contracts",
         "type": "address[]"
-      },
-      {
-        "internalType": "address[]",
-        "name": "_rTokenParts",
-        "type": "address[]"
-      },
-      {
-        "internalType": "address payable",
-        "name": "_rETH",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_rDOL",
-        "type": "address"
       }
     ],
     "name": "initialize",
@@ -155,172 +110,84 @@
   {
     "inputs": [
       {
+        "internalType": "string",
+        "name": "key",
+        "type": "string"
+      }
+    ],
+    "name": "getAddress",
+    "outputs": [
+      {
         "internalType": "address",
-        "name": "_orchestrator",
+        "name": "",
         "type": "address"
       }
     ],
-    "name": "initialize",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
   },
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "rToken",
-        "type": "address"
+        "internalType": "string",
+        "name": "key",
+        "type": "string"
+      }
+    ],
+    "name": "getContractConfig",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "addr",
+            "type": "address"
+          },
+          {
+            "internalType": "enum Orchestrator.ContractVariability",
+            "name": "variability",
+            "type": "uint8"
+          },
+          {
+            "internalType": "enum Orchestrator.UpdatePermission",
+            "name": "permission",
+            "type": "uint8"
+          }
+        ],
+        "internalType": "struct Orchestrator.ContractConfig",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "key",
+        "type": "string"
       },
       {
         "internalType": "address",
-        "name": "priceFeed",
+        "name": "addr",
         "type": "address"
       },
       {
-        "internalType": "uint256",
-        "name": "poolStartBlock",
-        "type": "uint256"
-      }
-    ],
-    "name": "setupMarket",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getRDS",
-    "outputs": [
+        "internalType": "enum Orchestrator.ContractVariability",
+        "name": "variability",
+        "type": "uint8"
+      },
       {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
+        "internalType": "enum Orchestrator.UpdatePermission",
+        "name": "permission",
+        "type": "uint8"
       }
     ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getDOL",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getOracle",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getInterestRateModel",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getMarketController",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getDistributor",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getReporter",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getCouncil",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getDemocracy",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_reporter",
-        "type": "address"
-      }
-    ],
-    "name": "setReporter",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "setDistributorFinal",
+    "name": "registerContract",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -328,12 +195,17 @@
   {
     "inputs": [
       {
+        "internalType": "string",
+        "name": "key",
+        "type": "string"
+      },
+      {
         "internalType": "address",
-        "name": "_distributor",
+        "name": "newAddr",
         "type": "address"
       }
     ],
-    "name": "upgradeDistributor",
+    "name": "updateContract",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -341,64 +213,51 @@
   {
     "inputs": [
       {
+        "internalType": "string",
+        "name": "key",
+        "type": "string"
+      },
+      {
         "internalType": "address",
-        "name": "_controller",
+        "name": "impl",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes",
+        "name": "initialCall",
+        "type": "bytes"
+      },
+      {
+        "internalType": "enum Orchestrator.UpdatePermission",
+        "name": "permission",
+        "type": "uint8"
+      }
+    ],
+    "name": "registerProxy",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
         "type": "address"
       }
     ],
-    "name": "upgradeMarketController",
-    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "_oracle",
-        "type": "address"
-      }
-    ],
-    "name": "setOracle",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
+        "internalType": "string",
+        "name": "key",
+        "type": "string"
+      },
       {
         "internalType": "address",
-        "name": "_interestRateModel",
+        "name": "newImpl",
         "type": "address"
       }
     ],
-    "name": "setInterestRateModel",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_council",
-        "type": "address"
-      }
-    ],
-    "name": "setCouncil",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_democracy",
-        "type": "address"
-      }
-    ],
-    "name": "setDemocracy",
+    "name": "upgradeProxy",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

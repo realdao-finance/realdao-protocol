@@ -1,8 +1,6 @@
 pragma solidity ^0.6.0;
 
-import "../interfaces/OrchestratorInterface.sol";
-
-contract MockOrchestrator is OrchestratorInterface {
+contract MockOrchestrator {
   address public controller;
   address public oracle;
   address public interestRateModel;
@@ -12,6 +10,7 @@ contract MockOrchestrator is OrchestratorInterface {
   address public council;
   address public democracy;
   address public reporter;
+  mapping(string => address) contracts;
 
   address public _guardian;
 
@@ -19,71 +18,39 @@ contract MockOrchestrator is OrchestratorInterface {
     _guardian = msg.sender;
   }
 
-  function guardian() external override view returns (address) {
+  function guardian() external view returns (address) {
     return _guardian;
   }
 
   function setMarketController(address addr) external {
-    controller = addr;
+    contracts["MARKET_CONTROLLER"] = addr;
   }
 
   function setDistributor(address addr) external {
-    distributor = addr;
+    contracts["DISTRIBUTOR"] = addr;
   }
 
   function setOracle(address addr) external {
-    oracle = addr;
+    contracts["ORACLE"] = addr;
   }
 
   function setInterestRateModel(address addr) external {
-    interestRateModel = addr;
+    contracts["INTEREST_RATE_MODEL"] = addr;
   }
 
   function setRDS(address addr) external {
-    rds = addr;
+    contracts["RDS"] = addr;
   }
 
   function setCouncil(address addr) external {
-    council = addr;
+    contracts["COUNCIL"] = addr;
   }
 
   function setDemocracy(address addr) external {
-    democracy = addr;
+    contracts["DEMOCRACY"] = addr;
   }
 
-  function getMarketController() external override view returns (address) {
-    return controller;
-  }
-
-  function getOracle() external override view returns (address) {
-    return oracle;
-  }
-
-  function getInterestRateModel() external override view returns (address) {
-    return interestRateModel;
-  }
-
-  function getDistributor() external override view returns (address) {
-    return distributor;
-  }
-
-  function getRDS() external override view returns (address) {
-    return rds;
-  }
-
-  function getDOL() external override view returns (address) {
-    return dol;
-  }
-
-  function getReporter() external override view returns (address) {
-    return reporter;
-  }
-
-  function getCouncil() external override view returns (address) {
-    return council;
-  }
-
-  function getDemocracy() external override view returns (address) {
-    return democracy;
+  function getAddress(string calldata key) external view returns (address) {
+    return contracts[key];
   }
 }

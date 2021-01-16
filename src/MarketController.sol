@@ -2,13 +2,13 @@ pragma solidity ^0.6.0;
 
 import "./interfaces/DistributorInterface.sol";
 import "./MarketControllerBase.sol";
-import "./MarketControllerPart1.sol";
+import "./MarketControllerLibrary.sol";
 
 /**
  * @title RealDAO' MarketController Contract
  */
 contract MarketController is MarketControllerBase {
-  MarketControllerPart1 public part1;
+  MarketControllerLibrary public controllerLib;
 
   function initialize(address _orchestrator) public override {
     super.initialize(_orchestrator);
@@ -19,14 +19,13 @@ contract MarketController is MarketControllerBase {
     maxAssets = 256;
   }
 
-  function bind(address[] calldata _parts) external {
-    checkParams(_parts.length == 1, ERR_INVALID_PARTS_LEN, "MarketController/invalid parts length");
-    part1 = MarketControllerPart1(_parts[0]);
-    part1.bind(address(this));
+  function bind(address _lib) external {
+    controllerLib = MarketControllerLibrary(_lib);
+    controllerLib.bind(address(this));
   }
 
   function getOracle() external view returns (address) {
-    return orchestrator.getOracle();
+    return orchestrator.getAddress("ORACLE");
   }
 
   /**
@@ -182,7 +181,7 @@ contract MarketController is MarketControllerBase {
       ERR_MARKET_STATUS_NONE,
       "MarketController/liquidating borrowed token state is none"
     );
-    return part1.liquidateBorrowAllowed(rTokenBorrowed, rTokenCollateral, liquidator, borrower, repayAmount);
+    return controllerLib.liquidateBorrowAllowed(rTokenBorrowed, rTokenCollateral, liquidator, borrower, repayAmount);
   }
 
   /**
@@ -198,7 +197,7 @@ contract MarketController is MarketControllerBase {
     address rTokenCollateral,
     uint256 actualRepayAmount
   ) external view returns (uint256) {
-    return part1.liquidateCalculateSeizeTokens(rTokenBorrowed, rTokenCollateral, actualRepayAmount);
+    return controllerLib.liquidateCalculateSeizeTokens(rTokenBorrowed, rTokenCollateral, actualRepayAmount);
   }
 
   /**
@@ -320,7 +319,7 @@ contract MarketController is MarketControllerBase {
   function closeMarket(address rToken) external onlyCouncil {
     Market storage market = markets[rToken];
     checkParams(market.state == MarketState.Listed, ERR_MARKET_NOT_LISTED, "MarketController/close not listed market");
-    DistributorInterface(orchestrator.getDistributor()).closeLendingPool(rToken);
+    DistributorInterface(orchestrator.getAddress("DISTRIBUTOR")).closeLendingPool(rToken);
     market.state = MarketState.Closing;
   }
 
@@ -433,6 +432,6 @@ contract MarketController is MarketControllerBase {
     uint256 redeemTokens,
     uint256 borrowAmount
   ) internal view returns (uint256, uint256) {
-    return part1.getHypotheticalAccountLiquidity(account, rTokenModify, redeemTokens, borrowAmount);
+    return controllerLib.getHypotheticalAccountLiquidity(account, rTokenModify, redeemTokens, borrowAmount);
   }
 }

@@ -22,6 +22,8 @@ abstract contract ErrorBase {
   uint8 constant ERR_DOMAIN_COUNCIL = 16;
   uint8 constant ERR_DOMAIN_DEMOCRACY = 17;
   uint8 constant ERR_DOMAIN_ORCHESTRATOR = 18;
+  uint8 constant ERR_DOMAIN_DOL = 19;
+  uint8 constant ERR_DOMAIN_RDS = 20;
 
   uint8 constant ERR_TYPE_PARAMETER = 1;
   uint8 constant ERR_TYPE_MATH = 2;

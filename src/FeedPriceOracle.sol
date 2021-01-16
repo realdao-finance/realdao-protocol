@@ -1,6 +1,7 @@
 pragma solidity ^0.6.0;
+pragma experimental ABIEncoderV2;
 
-import "./interfaces/ChainlinkAggregatorV3Interface.sol";
+import "./interfaces/PriceOracleInterface.sol";
 import "./interfaces/EIP20Interface.sol";
 import "./interfaces/RTokenInterface.sol";
 import "./libraries/Strings.sol";
@@ -8,17 +9,16 @@ import "./libraries/SafeMath.sol";
 import "./AuthBase.sol";
 
 /**
- * @title Price oracle implementation based on chainlink
+ * @title Price oracle implementation based on centralized feed
  */
-contract ChainlinkPriceOracle is AuthBase {
+
+contract FeedPriceOracle is AuthBase {
   using SafeMath for uint256;
 
-  mapping(string => address) priceFeeds;
+  address public admin;
+  mapping(string => uint256) public assetPrices;
 
-  uint8 constant ERR_UNDERLYING_DECIMALS_TOO_BIG = 1;
-  uint8 constant ERR_SET_PRICE_DEV_ONLY = 2;
-
-  event NewPriceFeedAddress(address operator, string symbol, address addr);
+  event PricesUpdated(string[] symbols, uint256[] prices);
 
   /**
    * @notice Initialize the price oracle
@@ -45,37 +45,26 @@ contract ChainlinkPriceOracle is AuthBase {
     } else {
       underlyingDecimals = EIP20Interface(rToken.underlying()).decimals();
     }
-
-    expect(
-      underlyingDecimals <= 18,
-      ERR_UNDERLYING_DECIMALS_TOO_BIG,
-      "ChainlinkPriceOracle/underlying decimals too big"
-    );
+    require(underlyingDecimals <= 18, "FeedPriceOracle/underlying decimals overflow");
     uint256 price = getPrice(symbol);
     return price.mul(10**(18 - underlyingDecimals));
   }
 
   /**
-   * @notice Set the address of the price feed contract
-   * @param symbol The anchor asset symbol, e.g. ETH, BTC
-   * @param addr The contract address
+   * @notice Set the prices of anchor assets directly
+   * @param symbols The anchor asset symbol, e.g. ETH, BTC
+   * @param prices The asset prices to set
    */
-  function setPriceFeedAddress(string calldata symbol, address addr) external onlyCouncil {
-    setPriceFeedAddressInternal(symbol, addr);
-  }
-
-  function setPriceFeedAddressInternal(string memory symbol, address addr) internal {
-    priceFeeds[symbol] = addr;
-    emit NewPriceFeedAddress(msg.sender, symbol, addr);
+  function setUnderlyingPrices(string[] calldata symbols, uint256[] calldata prices) external onlyCouncil {
+    // FIXME check prams lenght
+    for (uint256 i = 0; i < symbols.length; i++) {
+      assetPrices[symbols[i]] = prices[i];
+    }
+    emit PricesUpdated(symbols, prices);
   }
 
   function getPrice(string memory symbol) internal view returns (uint256) {
-    address priceFeed = priceFeeds[symbol];
-    if (priceFeed == address(0)) {
-      return 0;
-    }
-    (, int256 price, , , ) = ChainlinkAggregatorV3Interface(priceFeed).latestRoundData();
-    return uint256(price);
+    return assetPrices[symbol];
   }
 
   function errorDomain() internal override pure returns (uint8) {
