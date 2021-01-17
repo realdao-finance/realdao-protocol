@@ -45,20 +45,14 @@ contract Orchestrator is ErrorBase {
   string constant KEY_REPORTER = "REPORTER";
 
   uint8 constant ERR_INVALID_CONTRACT_NUMBER = 1;
-  uint8 constant ERR_ONLY_GUARDIAN = 2;
-  uint8 constant ERR_INIT_DEMOCRACY = 3;
-  uint8 constant ERR_CHANGE_DEMOCRACY = 4;
-  uint8 constant ERR_PROXY_ALREADY_CREATED = 5;
-  uint8 constant ERR_PROXY_NOT_CREATED = 6;
-  uint8 constant ERR_DEMOCRACY_NOT_SET = 7;
-  uint8 constant ERR_DISTRIBUTOR_FINAL = 8;
-  uint8 constant ERR_CONTRACT_REGISTERED = 9;
-  uint8 constant ERR_INVALID_DEMOCRACY_CONFIG = 10;
-  uint8 constant ERR_CONTRACT_NOT_REGISTERED = 11;
-  uint8 constant ERR_UPDATE_UNREPLACEABLE_CONTRACT = 12;
-  uint8 constant ERR_REQUIRE_COUNCIL_PERMISSION = 13;
-  uint8 constant ERR_REQUIRE_DEMOCRACY_PERMISSION = 14;
-  uint8 constant ERR_DEMOCRACY_SHOULD_NOT_BE_PROXY = 15;
+  uint8 constant ERR_DEMOCRACY_NOT_SET = 2;
+  uint8 constant ERR_CONTRACT_REGISTERED = 3;
+  uint8 constant ERR_INVALID_DEMOCRACY_CONFIG = 4;
+  uint8 constant ERR_CONTRACT_NOT_REGISTERED = 5;
+  uint8 constant ERR_UPDATE_UNREPLACEABLE_CONTRACT = 6;
+  uint8 constant ERR_REQUIRE_COUNCIL_PERMISSION = 7;
+  uint8 constant ERR_REQUIRE_DEMOCRACY_PERMISSION = 8;
+  uint8 constant ERR_DEMOCRACY_SHOULD_NOT_BE_PROXY = 9;
 
   event ProxyCreated(string key, address proxy, address indexed impl);
   event ProxyUpgraded(string key, address proxy, address oldImpl, address newImpl);
