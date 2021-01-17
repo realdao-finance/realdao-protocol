@@ -20,13 +20,13 @@ module.exports = {
     orchestrator: '0x297344B27D52abAe0f30AFE947ddAd60d425F40d',
   },
   testnet: {
-    provider: 'wss://ws-testnet.hecochain.com',
-    chainId: 0x539,
+    provider: 'https://http-testnet.hecochain.com',
+    chainId: 256,
     orchestrator: '0x1d736CBAB67422a524E6923A2e4f47C2Ae891335',
   },
   mainnet: {
-    provider: 'wss://ws-mainnet.hecochain.com',
-    chainId: 1,
+    provider: 'https://http-mainnet-node1.hecochain.com',
+    chainId: 128,
     orchestrator: '0x297344B27D52abAe0f30AFE947ddAd60d425F40d',
   },
 }
