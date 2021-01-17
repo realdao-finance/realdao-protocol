@@ -4,6 +4,11 @@ module.exports = {
     chainId: 0x539,
     orchestrator: '0xfe57175001DAA3BacB220dBe30036241E20F1FA0',
   },
+  remote: {
+    provider: 'ws://localhost:8545',
+    chainId: 0x540,
+    orchestrator: '0xfe57175001DAA3BacB220dBe30036241E20F1FA0',
+  },
   kovan: {
     provider: 'https://kovan.infura.io/v3/d3f8f9c2141b4561b6c7f23a34466d7c',
     chainId: 42,
