@@ -98,7 +98,7 @@ class RealDAO {
 
   async loadCouncil() {
     if (!this._council) {
-      this._council = await this._createProtocolContractInstance(ABI_Council, 'COUNIL')
+      this._council = await this._createProtocolContractInstance(ABI_Council, 'COUNCIL')
     }
   }
 
