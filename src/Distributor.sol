@@ -60,7 +60,6 @@ contract Distributor is AuthBase {
   mapping(address => uint32) tokenToPoolSeq;
 
   int32 constant MAIN_POOL_ID = -1;
-  uint256 constant BLOCKS_PER_YEAR = 2102400;
   uint256 constant MANTISSA = 1e18;
 
   uint32 constant POOL_STATE_NOT_START = 0;
@@ -480,10 +479,11 @@ contract Distributor is AuthBase {
     activePools += 1;
     totalWeight += pool.weight;
     if (mineStartBlock == 0) {
-      uint256 decimals = RDS(orchestrator.getAddress("RDS")).decimals();
-      rewardsPerBlock = 4 * (10**decimals);
+      RDS rds = RDS(orchestrator.getAddress("RDS"));
+      uint256 tokensForMiner = rds.maxSupply().sub(rds.totalSupply());
+      rewardsPerBlock = tokensForMiner.div(2).div(blocksPerYear);
       mineStartBlock = currentBlockNumber;
-      nextHalvingBlock = currentBlockNumber.add(BLOCKS_PER_YEAR);
+      nextHalvingBlock = currentBlockNumber.add(blocksPerYear);
     }
   }
 
@@ -569,7 +569,7 @@ contract Distributor is AuthBase {
     uint256 currentBlockNumber = getCurrentBlockNumber();
     if (currentBlockNumber >= nextHalvingBlock) {
       rewardsPerBlock = rewardsPerBlock.div(2);
-      nextHalvingBlock = currentBlockNumber.add(BLOCKS_PER_YEAR);
+      nextHalvingBlock = currentBlockNumber.add(blocksPerYear);
     }
   }
 

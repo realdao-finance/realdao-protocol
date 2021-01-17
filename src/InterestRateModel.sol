@@ -30,11 +30,6 @@ contract InterestRateModel is AuthBase {
    */
   uint256 public kink;
 
-  /**
-   * @notice The approximate number of blocks per year that is assumed by the interest rate model
-   */
-  uint256 public constant blocksPerYear = 2102400;
-
   event NewInterestParams(
     uint256 baseRatePerBlock,
     uint256 multiplierPerBlock,

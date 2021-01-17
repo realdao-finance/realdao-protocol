@@ -13,6 +13,8 @@ abstract contract ErrorBase {
     string context;
   }
 
+  uint256 public constant blocksPerYear = 10512000;
+
   uint8 constant ERR_DOMAIN_UNKNOW = 10;
   uint8 constant ERR_DOMAIN_RTOKEN = 11;
   uint8 constant ERR_DOMAIN_CONTROLLER = 12;
