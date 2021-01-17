@@ -1,6 +1,6 @@
 {
   "name": "realdao",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "RealDAO SDK",
   "main": "index.js",
   "directories": {

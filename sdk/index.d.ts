@@ -6,7 +6,6 @@ export class RealDAO {
   setProvider(provider: any): void;
   chainId(): any;
   isTransactionConfirmed(hash: any): Promise<boolean>;
-  loadOrchestrator(): Promise<void>;
   loadDOL(): Promise<void>;
   loadRDS(): Promise<void>;
   loadReporter(): Promise<void>;
@@ -32,4 +31,5 @@ export class RealDAO {
   democracy(raw: any): any;
   rToken(underlyingSymbol: any, raw: any): any;
   getErc20Token(addr: any, raw: any): Promise<any>;
+  uniswapPairView(addr: any, raw: any): any;
 }
