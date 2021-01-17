@@ -12,6 +12,7 @@ const ABI_EIP20Interface = require('../abis/EIP20Interface.json')
 const ABI_InterestRateModel = require('../abis/InterestRateModel.json')
 const ABI_Council = require('../abis/Council.json')
 const ABI_Democracy = require('../abis/Democracy.json')
+const ABI_IUniswapV2PairView = require('../abis/IUniswapV2PairView.json')
 
 const Networks = require('./networks')
 
@@ -47,6 +48,7 @@ class RealDAO {
     this._democracy = null
     this._rTokens = {}
     this._erc20Tokens = {}
+    this._uniswapPairViews = {}
   }
 
   chainId() {
@@ -193,11 +195,18 @@ class RealDAO {
     return raw ? this._rTokens[underlyingSymbol] : this._rTokens[underlyingSymbol].methods
   }
 
-  getERC20Token(addr, raw) {
+  erc20Token(addr, raw) {
     if (!this._erc20Tokens[addr]) {
       this._erc20Tokens[addr] = this._createContractInstance(ABI_EIP20Interface, addr)
     }
     return raw ? this._erc20Tokens[addr] : this._erc20Tokens[addr].methods
+  }
+
+  uniswapPairView(addr, raw) {
+    if (!this._uniswapPairViews[addr]) {
+      this._uniswapPairViews[addr] = this._createContractInstance(ABI_IUniswapV2PairView, addr)
+    }
+    return raw ? this._uniswapPairViews[addr] : this._uniswapPairViews[addr].methods
   }
 
   async _createProtocolContractInstance(abi, key) {

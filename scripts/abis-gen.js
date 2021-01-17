@@ -18,6 +18,7 @@ function main(argv) {
     'Democracy',
     'InterestRateModel',
     'PriceOracleInterface',
+    'IUniswapV2PairView',
   ]
   const inputDir = `../build/contracts`
   const outputDir = argv[2]
