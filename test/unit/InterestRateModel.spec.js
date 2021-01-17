@@ -2,7 +2,7 @@ const { expectSuccess } = require('../util/expect')
 const InterestRateModel = artifacts.require('InterestRateModel')
 const MockOrchestrator = artifacts.require('MockOrchestrator')
 
-const BLOCKS_PER_PEAR = 2102400
+const BLOCKS_PER_YEAR = 2102400 * 5
 
 let accounts
 let irs
@@ -28,8 +28,8 @@ contract('InterestRateModel', () => {
       const br = await irs.getBorrowRate(cash, borrows, reserves)
       const sr = await irs.getSupplyRate(cash, borrows, reserves, (1e17).toString())
       const urLiteral = Number(ur.toString()) / 1e18
-      const brLiteral = (Number(br.toString()) * BLOCKS_PER_PEAR) / 1e18
-      const srLiteral = (Number(sr.toString()) * BLOCKS_PER_PEAR) / 1e18
+      const brLiteral = (Number(br.toString()) * BLOCKS_PER_YEAR) / 1e18
+      const srLiteral = (Number(sr.toString()) * BLOCKS_PER_YEAR) / 1e18
       console.log(urLiteral.toPrecision(2), brLiteral.toPrecision(2), srLiteral.toPrecision(2))
     }
   })
