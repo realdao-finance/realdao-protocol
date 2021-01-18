@@ -1,12 +1,7 @@
 module.exports = {
   dev: {
     provider: 'ws://localhost:8545',
-    chainId: 0x539,
-    orchestrator: '0xfe57175001DAA3BacB220dBe30036241E20F1FA0',
-  },
-  remote: {
-    provider: 'ws://localhost:8545',
-    chainId: 0x540,
+    chainId: 1337,
     orchestrator: '0xfe57175001DAA3BacB220dBe30036241E20F1FA0',
   },
   kovan: {
