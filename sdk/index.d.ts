@@ -30,6 +30,6 @@ export class RealDAO {
   council(raw: any): any;
   democracy(raw: any): any;
   rToken(underlyingSymbol: any, raw: any): any;
-  getErc20Token(addr: any, raw: any): Promise<any>;
+  erc20Token(addr: any, raw: any): Promise<any>;
   uniswapPairView(addr: any, raw: any): any;
 }
