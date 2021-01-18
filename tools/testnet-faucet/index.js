@@ -68,7 +68,7 @@ async function main(argv) {
       })
   })
 
-  const port = 3000
+  const port = process.env.PORT || 3000
   server.listen(port, '0.0.0.0', (err, address) => {
     if (err) throw err
   })
