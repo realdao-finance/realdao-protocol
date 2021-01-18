@@ -48,6 +48,13 @@ class ContractHelper extends RealDAO {
     return await this.oracle().setPriceFeedAddress(symbol, addr).send(from(this.admin))
   }
 
+  async transaction(contract, method, ...args) {
+    const loadFn = `load${this.pascalCase(contract)}`
+    await this[loadFn]()
+    const instance = this[`_${contract}`]
+    return await instance.methods[method](...args).send()
+  }
+
   async query(contract, method, ...args) {
     const loadFn = `load${this.pascalCase(contract)}`
     await this[loadFn]()
