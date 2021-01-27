@@ -2,7 +2,7 @@
 
 RealDAO Protocol is a Lightweight decentralized Stable Currency Protocol based on Two-way Lending market, with automatic interest rate target and liquidity mining incentive.
 
-This repository contains the core smart contract code that implement the Ampleforth protocol on the Ethereum blockchain.
+This repository contains the core smart contract code that implement the protocol on the Ethereum blockchain.
 
 ## Table of Contents
 

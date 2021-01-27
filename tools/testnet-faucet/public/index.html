@@ -1,7 +1,10 @@
 <html>
     <head>
-        <title>RealDAO testnet faucet(UNI-V2 LP Token)</title>
+        <title>RealDAO testnet faucet</title>
         <style type="text/css">
+          .container {
+            text-align: center;
+          }
           input {
             width: 400px;
             height: 30px;
@@ -14,8 +17,8 @@
         </style>
     </head>
     <body>
-      <div>
-        <h3>This faucet allows you to request mocked uniswap LP tokens to test RealDAO mining feature</h3>
+      <div class="container">
+        <h3>This faucet allows you to request fake LP tokens and fake collateral tokens</h3>
         <form action="/request" method="post">
           <input type="text" placeholder="Input your address" name="recipient"/>
           <button type="submit">Request</button>
