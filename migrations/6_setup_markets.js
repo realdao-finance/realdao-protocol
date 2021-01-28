@@ -45,7 +45,7 @@ async function setupMarket(MarketContract, FakeTokenContract, underlyingSymbol, 
 }
 
 async function main(deployer, network, accounts) {
-  isLive = network === 'mainnet' || network === 'testnet'
+  isLive = network === 'mainnet'
   await deployContracts(deployer)
 
   if (network === 'unittest' || network === 'dev') {
