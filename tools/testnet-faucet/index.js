@@ -21,6 +21,7 @@ function ok(reply, result) {
 
 function transferBatch(tokens, sender, recipient, amount) {
   const transactions = tokens.map((token) => {
+    console.log(`transfer from ${sender} to ${recipient}: ${amount}`)
     return token.transfer(recipient, amount).send({ from: sender, gas: 4000000 })
   })
   return Promise.all(transactions)
@@ -36,15 +37,27 @@ async function main(argv) {
     provider: env.networks[env.current].provider,
     orchestrator: env.networks[env.current].orchestrator,
   })
-  await realDAO.loadDistributor()
-  const pools = await realDAO.distributor().getAllPools().call()
-  console.log('pools:', pools)
-  let fakeLPTokens = []
-  for (const pool of pools) {
-    fakeLPTokens.push(realDAO.erc20Token(pool.tokenAddr))
-  }
   const accounts = await web3.eth.getAccounts()
   const admin = accounts[0]
+
+  await realDAO.loadDistributor()
+  await realDAO.loadReporter()
+  const pools = await realDAO.distributor().getAllPools().call()
+  const markets = await realDAO.reporter().getAllMarketInfo().call()
+  // console.log('pools:', pools)
+  let tokens = []
+  for (const pool of pools) {
+    tokens.push(realDAO.erc20Token(pool.tokenAddr))
+  }
+  for (const market of markets) {
+    if (market.underlyingSymbol !== 'DOL' && market.underlyingSymbol !== 'ETH') {
+      tokens.push(realDAO.erc20Token(market.underlyingAssetAddress))
+    }
+  }
+  for (const token of tokens) {
+    const tokenInfo = await Promise.all([token.symbol().call(), token.decimals().call(), token.balanceOf(admin).call()])
+    console.log('token info:', tokenInfo)
+  }
   const userStats = new Map()
 
   function addCount(user) {
@@ -75,7 +88,7 @@ async function main(argv) {
     if (!web3.utils.isAddress(recipient)) {
       return fail(reply, 'Not an address')
     }
-    transferBatch(fakeLPTokens, admin, recipient, BigInt(1e21).toString())
+    transferBatch(tokens, admin, recipient, BigInt(1e21).toString())
       .then((result) => {
         addCount(recipient)
         ok(reply, result.transactionHash)
