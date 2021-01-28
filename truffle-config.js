@@ -46,6 +46,7 @@ module.exports = {
       },
       network_id: 256,
       gas: 8000000,
+      networkCheckTimeout: 10000,
     },
     mainnet: {
       provider: function () {
@@ -53,7 +54,8 @@ module.exports = {
       },
       network_id: 128,
       gas: 8000000,
-      // gasPrice: env.gasPrice,
+      gasPrice: env.gasPrice,
+      networkCheckTimeout: 10000,
     },
   },
 }
