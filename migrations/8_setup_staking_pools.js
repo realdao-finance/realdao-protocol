@@ -12,10 +12,10 @@ async function main(deployer, network, accounts) {
   const admin = accounts[0]
 
   if (network !== 'mainnet') {
-    await deployer.deploy(FakeLP_HT_DOL)
-    await deployer.deploy(FakeLP_HT_RDS)
     await deployer.deploy(FakeLP_HUSD_DOL)
     await deployer.deploy(FakeLP_HUSD_RDS)
+    await deployer.deploy(FakeLP_HT_DOL)
+    await deployer.deploy(FakeLP_HT_RDS)
 
     // const supremeInstance = await Supreme.deployed()
     // const orchestratorAddress = await supremeInstance.orchestrator()
