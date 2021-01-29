@@ -37,4 +37,19 @@ interface InterestRateModelInterface {
     uint256 reserves,
     uint256 reserveFactorMantissa
   ) external view returns (uint256);
+
+  /**
+   * @notice Calculates the current supply interest rate per block for DOL market
+   * @param cash The total amount of cash the market has
+   * @param borrows The total amount of borrows the market has outstanding
+   * @param reserves The total amount of reserves the market has
+   * @param reserveFactorMantissa The current reserve factor the market has
+   * @return The supply rate per block (as a percentage, and scaled by 1e18)
+   */
+  function getSupplyRate2(
+    uint256 cash,
+    uint256 borrows,
+    uint256 reserves,
+    uint256 reserveFactorMantissa
+  ) external view returns (uint256);
 }

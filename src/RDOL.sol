@@ -18,7 +18,7 @@ contract RDOL is RERC20 {
   ) public {
     super.initialize(_orchestrator, _underlying, "RealdDAO wrapped DOL", "rDOL", "USD", parts);
 
-    uint256 dolFirstSupply = 1e16; // 100 million
+    uint256 dolFirstSupply = systemGenesisSupply;
     increaseSystemSupplyInternal(dolFirstSupply);
   }
 

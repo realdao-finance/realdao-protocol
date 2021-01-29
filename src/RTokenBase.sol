@@ -46,6 +46,7 @@ contract RTokenBase is AuthBase, Exponential {
 
   uint256 constant borrowRateMaxMantissa = 0.0005e16;
   uint256 constant reserveFactorMaxMantissa = 1e18;
+  uint256 constant systemGenesisSupply = 1e16; // 100 million
 
   uint8 constant ERR_INVALID_PARTS_LEN = 1;
   uint8 constant ERR_SNAPSHOT = 2;

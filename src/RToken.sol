@@ -197,7 +197,11 @@ contract RToken is RTokenBase {
    */
   function supplyRatePerBlock() external view returns (uint256) {
     InterestRateModelInterface irm = InterestRateModelInterface(orchestrator.getAddress("INTEREST_RATE_MODEL"));
-    return irm.getSupplyRate(getCashPrior(), totalBorrows, totalReserves, reserveFactorMantissa);
+    if (Strings.equals(symbol, "rDOL")) {
+      return irm.getSupplyRate2(getCashPrior(), totalBorrows, totalReserves, reserveFactorMantissa);
+    } else {
+      return irm.getSupplyRate(getCashPrior(), totalBorrows, totalReserves, reserveFactorMantissa);
+    }
   }
 
   /**

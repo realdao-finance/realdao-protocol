@@ -122,6 +122,25 @@ contract InterestRateModel is AuthBase {
   }
 
   /**
+   * @notice Calculates the current supply rate per block for DOL market
+   * @param cash The amount of cash in the market
+   * @param borrows The amount of borrows in the market
+   * @param reserves The amount of reserves in the market
+   * @param reserveFactorMantissa The current reserve factor for the market
+   * @return The supply rate percentage per block as a mantissa (scaled by 1e18)
+   */
+  function getSupplyRate2(
+    uint256 cash,
+    uint256 borrows,
+    uint256 reserves,
+    uint256 reserveFactorMantissa
+  ) external view returns (uint256) {
+    uint256 oneMinusReserveFactor = uint256(1e18).sub(reserveFactorMantissa);
+    uint256 borrowRate = getBorrowRateInternal(cash, borrows, reserves);
+    return borrowRate.mul(oneMinusReserveFactor).div(1e18);
+  }
+
+  /**
    * @notice Internal function to update the parameters of the interest rate model
    * @param baseRatePerYear The approximate target base APR, as a mantissa (scaled by 1e18)
    * @param multiplierPerYear The rate of increase in interest rate wrt utilization (scaled by 1e18)
