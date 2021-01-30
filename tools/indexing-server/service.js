@@ -12,6 +12,7 @@ const Repository = require('./repository')
 const CouncilRepository = require('./council-repository')
 const TokenManager = require('./token-manager')
 const CouncilObserver = require('./council-observer')
+const PriceFeeder = require('./price-feeder')
 const constants = require('./constants')
 
 const env = require('../../.env.js')
@@ -34,6 +35,8 @@ class Service {
     await this.realdao.loadReporter()
     await this.realdao.loadController()
     await this.realdao.loadCouncil()
+    await this.realdao.loadOracle()
+
     global.web3 = this.realdao._web3
 
     const dataDir = this.options.dataDir
@@ -45,11 +48,15 @@ class Service {
     const councilContract = this.realdao.council(true)
     this.councilObserver = new CouncilObserver({ dataDir, councilContract, councilRepo: this.councilRepo })
 
+    this.priceFeeder = new PriceFeeder({ oracleContract: this.realdao.oracle() })
+
     await this.accountRepo.initialize()
     await this.councilRepo.initialize()
     await this.tokenManager.initialize()
     await this.retrievalWorker.initialize()
     await this.councilObserver.initialize()
+    await this.priceFeeder.initialize()
+    this.priceFeeder.setAdminKey(env.privateKey)
 
     this.retrievalWorker.on('AccountRetrieved', (msg) => {
       this.accountRepo.createOrUpdateAccount(msg)
@@ -65,6 +72,7 @@ class Service {
     this.retrievalWorker.start()
     this.tokenManager.start()
     this.councilObserver.start()
+    this.priceFeeder.start()
 
     setInterval(() => {
       this.refresh()

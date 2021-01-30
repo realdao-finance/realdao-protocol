@@ -11,10 +11,12 @@ class SmokeTest extends RealDAO {
   async run() {
     global.web3 = this._web3
     const accounts = await this._web3.eth.getAccounts()
-    const admin = (this.admin = accounts[0])
     const user1 = accounts[1]
     const user2 = accounts[2]
     const user3 = accounts[3]
+
+    const account = this._web3.eth.accounts.wallet.add(env.privateKey)
+    const admin = account.address
 
     await this.loadDistributor()
     await this.loadOracle()
@@ -38,7 +40,7 @@ class SmokeTest extends RealDAO {
     // await distributor.openPool(0).send(from(admin))
     // await distributor.openPool(1).send(from(admin))
 
-    await oracle.setUnderlyingPrices(['ETH'], [400e8]).send({ from: admin })
+    await oracle.setUnderlyingPrices(['ETH'], [400e8]).send(from(admin))
 
     // supply ether
     console.log('===========supplying ETH==============')

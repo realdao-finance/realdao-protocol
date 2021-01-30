@@ -8,8 +8,8 @@ function from(account, value) {
 
 class ContractHelper extends RealDAO {
   async run(cmd, args) {
-    const accounts = await this._web3.eth.getAccounts()
-    this.admin = accounts[0]
+    const account = this._web3.eth.accounts.wallet.add(env.privateKey)
+    this.admin = account.address
     const func = this[cmd].bind(this)
     let result = await func(...args)
     console.log(result)

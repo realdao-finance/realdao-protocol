@@ -19,26 +19,24 @@ function ok(reply, result) {
   })
 }
 
-function transferBatch(tokens, sender, recipient, amount) {
-  const transactions = tokens.map((token) => {
+async function transferBatch(tokens, sender, recipient, amount) {
+  for (const token of tokens) {
     console.log(`transfer from ${sender} to ${recipient}: ${amount}`)
-    return token.transfer(recipient, amount).send({ from: sender, gas: 4000000 })
-  })
-  return Promise.all(transactions)
+    await token.transfer(recipient, amount).send({ from: sender, gas: 4000000 })
+  }
 }
 
 async function main(argv) {
-  const addr = argv[2]
-  const web3 = new Web3(env.networks[env.current].provider)
-  global.web3 = web3
   const realDAO = new RealDAO({
     Web3,
     env: env.current,
     provider: env.networks[env.current].provider,
     orchestrator: env.networks[env.current].orchestrator,
   })
-  const accounts = await web3.eth.getAccounts()
-  const admin = accounts[0]
+  global.web3 = realDAO._web3
+  const account = realDAO._web3.eth.accounts.wallet.add(env.privateKey)
+  const admin = account.address
+  console.log('load admin:', admin)
 
   await realDAO.loadDistributor()
   await realDAO.loadReporter()
@@ -91,7 +89,7 @@ async function main(argv) {
     transferBatch(tokens, admin, recipient, BigInt(1e21).toString())
       .then((result) => {
         addCount(recipient)
-        ok(reply, result.transactionHash)
+        ok(reply, {})
       })
       .catch((err) => {
         fail(reply, err)
