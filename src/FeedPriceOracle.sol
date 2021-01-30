@@ -19,6 +19,7 @@ contract FeedPriceOracle is AuthBase {
   mapping(string => uint256) public assetPrices;
 
   event PricesUpdated(string[] symbols, uint256[] prices);
+  event AdminChanged(address oldVal, address newVal);
 
   /**
    * @notice Initialize the price oracle
@@ -55,12 +56,19 @@ contract FeedPriceOracle is AuthBase {
    * @param symbols The anchor asset symbol, e.g. ETH, BTC
    * @param prices The asset prices to set
    */
-  function setUnderlyingPrices(string[] calldata symbols, uint256[] calldata prices) external onlyCouncil {
-    // FIXME check prams lenght
+  function setUnderlyingPrices(string[] calldata symbols, uint256[] calldata prices) external {
+    require(symbols.length == prices.length, "FeedPriceOracle/parameters length missmatch");
+    require(msg.sender == admin, "FeedPriceOracle/permission denied");
     for (uint256 i = 0; i < symbols.length; i++) {
       assetPrices[symbols[i]] = prices[i];
     }
     emit PricesUpdated(symbols, prices);
+  }
+
+  function changeAdmin(address newAdmin) external onlyCouncil {
+    require(newAdmin != admin, "FeedPriceOracle/the same as current one");
+    emit AdminChanged(admin, newAdmin);
+    admin = newAdmin;
   }
 
   function getPrice(string memory symbol) internal view returns (uint256) {
